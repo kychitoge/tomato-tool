@@ -10,12 +10,15 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 
 use super::config::{ConfigSpec, FieldMeta};
+use super::i18n;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     // 程序配置
     #[serde(default = "default_false")]
     pub old_cli: bool,
+    #[serde(default = "default_ui_language")]
+    pub ui_language: String,
 
     // 网络配置
     #[serde(default = "default_max_workers")]
@@ -137,6 +140,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             old_cli: default_false(),
+            ui_language: default_ui_language(),
             max_workers: default_max_workers(),
             request_timeout: default_request_timeout(),
             max_retries: default_max_retries(),
@@ -191,10 +195,14 @@ impl ConfigSpec for Config {
     const FILE_NAME: &'static str = "config.yml";
 
     fn fields() -> &'static [FieldMeta] {
-        static FIELDS: [FieldMeta; 43] = [
+        static FIELDS: [FieldMeta; 44] = [
             FieldMeta {
                 name: "old_cli",
                 description: "是否使用老版本命令行界面",
+            },
+            FieldMeta {
+                name: "ui_language",
+                description: "界面语言 (zh-cn/vi/en)",
             },
             FieldMeta {
                 name: "max_workers",
@@ -370,6 +378,15 @@ impl ConfigSpec for Config {
 }
 
 impl Config {
+    pub fn normalize_i18n(&mut self) {
+        self.ui_language = i18n::normalize_lang_tag(&self.ui_language).to_string();
+        if self.audiobook_voice.trim().is_empty()
+            || self.audiobook_voice == "zh-CN-XiaoxiaoNeural"
+        {
+            self.audiobook_voice = i18n::default_edge_tts_voice(&self.ui_language).to_string();
+        }
+    }
+
     pub fn default_save_dir(&self) -> PathBuf {
         if self.save_path.trim().is_empty() {
             std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
@@ -665,8 +682,12 @@ fn default_novel_format() -> String {
     "epub".to_string()
 }
 
+fn default_ui_language() -> String {
+    i18n::LANG_VI.to_string()
+}
+
 fn default_audiobook_voice() -> String {
-    "zh-CN-XiaoxiaoNeural".to_string()
+    i18n::default_edge_tts_voice(i18n::LANG_VI).to_string()
 }
 
 fn default_audiobook_rate() -> String {

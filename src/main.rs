@@ -9,6 +9,11 @@
 //! - `ui`：TUI 与无 UI（old cli）两套交互
 //! - `prewarm_state`：启动预热状态（与 UI 协作显示）
 
+#![cfg_attr(
+    not(feature = "official-api"),
+    allow(dead_code, unused_imports, unused_variables, unused_mut, unreachable_code)
+)]
+
 use anyhow::{Result, anyhow};
 use clap::Parser;
 use std::thread;
@@ -125,6 +130,7 @@ fn main() -> Result<()> {
     });
 
     let mut config = load_config_from_data_dir(data_dir)?;
+    config.normalize_i18n();
 
     // Handle command-line download/update modes
     if cli.download.is_some() || cli.update.is_some() {

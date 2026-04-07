@@ -5,7 +5,7 @@ edition = "2024"
 
 [features]
 # 默认构建：启用 Official-API（保持现有行为）。
-default = ["official-api", "tts", "clipboard", "clipboard-arboard"]
+default = ["no-official-api", "tts", "clipboard", "clipboard-arboard"]
 
 # 依赖 Tomato-Novel-Official-API 的实现。
 official-api = ["dep:tomato-novel-official-api"]

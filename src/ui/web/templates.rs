@@ -3,31 +3,36 @@ pub(crate) const APP_JS: &str = include_str!("templates/app.js");
 pub(crate) const APP_CSS: &str = include_str!("templates/app.css");
 pub(crate) const APP_FAVICON_ICO: &[u8] = include_bytes!("../../../img/Tomato-downloader-ico.ico");
 
+#[cfg(feature = "official-api")]
+use crate::base_system::i18n;
+
 /// 仅当启用 official-api feature 时才注入免费声明。
 /// 未启用时展开为空串，占位符从 HTML 中抹除。
 #[cfg(feature = "official-api")]
-pub(crate) const FREE_NOTICE_HTML: &str = concat!(
-    r#"<div class="free-notice">"#,
-    "本程序完全免费 &middot; ",
-    r#"<a href="https://github.com/zhongbai2333/Tomato-Novel-Downloader" "#,
-    r#"target="_blank" rel="noopener">开源仓库</a><br />"#,
-    "若发现收费渠道，请勿上当受骗！",
-    "</div>",
-);
+pub(crate) fn free_notice_html(lang: &str) -> String {
+    format!(
+        r#"<div class="free-notice">{} &middot; <a href="https://github.com/zhongbai2333/Tomato-Novel-Downloader" target="_blank" rel="noopener">开源仓库</a><br />{}</div>"#,
+        i18n::tr(lang, "web.free_text"),
+        i18n::tr(lang, "web.free_warn")
+    )
+}
 
 #[cfg(not(feature = "official-api"))]
-pub(crate) const FREE_NOTICE_HTML: &str = "";
+pub(crate) fn free_notice_html(_lang: &str) -> String {
+    String::new()
+}
 
 /// 移动端插入到状态页底部的免费声明（仅 official-api feature 启用时非空）。
 #[cfg(feature = "official-api")]
-pub(crate) const FREE_NOTICE_MOBILE_HTML: &str = concat!(
-    r#"<div class="free-notice free-notice-mobile">"#,
-    "本程序完全免费 &middot; ",
-    r#"<a href="https://github.com/zhongbai2333/Tomato-Novel-Downloader" "#,
-    r#"target="_blank" rel="noopener">开源仓库</a><br />"#,
-    "若发现收费渠道，请勿上当受骗！",
-    "</div>",
-);
+pub(crate) fn free_notice_mobile_html(lang: &str) -> String {
+    format!(
+        r#"<div class="free-notice free-notice-mobile">{} &middot; <a href="https://github.com/zhongbai2333/Tomato-Novel-Downloader" target="_blank" rel="noopener">开源仓库</a><br />{}</div>"#,
+        i18n::tr(lang, "web.free_text"),
+        i18n::tr(lang, "web.free_warn")
+    )
+}
 
 #[cfg(not(feature = "official-api"))]
-pub(crate) const FREE_NOTICE_MOBILE_HTML: &str = "";
+pub(crate) fn free_notice_mobile_html(_lang: &str) -> String {
+    String::new()
+}

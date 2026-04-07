@@ -3,6 +3,7 @@
 //! 展示项目信息，并提供打开链接等按钮。
 
 use super::*;
+use crate::base_system::i18n;
 
 pub(super) fn handle_event_about(app: &mut App, event: Event) -> Result<()> {
     match event {
@@ -104,9 +105,18 @@ pub(super) fn draw_about(frame: &mut ratatui::Frame, app: &mut App) {
     app.last_about_buttons = Some(button_area);
 
     let mut text = String::new();
-    text.push_str("项目地址: https://github.com/zhongbai2333/Tomato-Novel-Downloader\n");
-    text.push_str("Fork From: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite\n");
-    text.push_str("作者: zhongbai2333\n");
+    text.push_str(&format!(
+        "{}: https://github.com/zhongbai2333/Tomato-Novel-Downloader\n",
+        i18n::tr(&app.config.ui_language, "about.project")
+    ));
+    text.push_str(&format!(
+        "{}: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite\n",
+        i18n::tr(&app.config.ui_language, "about.fork")
+    ));
+    text.push_str(&format!(
+        "{}: zhongbai2333\n",
+        i18n::tr(&app.config.ui_language, "about.author")
+    ));
     text.push_str("本项目仅供学习交流使用，请勿用于商业及违法行为。\n");
     text.push_str(&format!("\n当前版本: v{}\n", env!("CARGO_PKG_VERSION")));
 
@@ -114,7 +124,10 @@ pub(super) fn draw_about(frame: &mut ratatui::Frame, app: &mut App) {
     {
         text.push_str("\n===== 免费声明 =====\n");
         text.push_str(
-            "本程序完全免费，官方仓库: https://github.com/zhongbai2333/Tomato-Novel-Downloader\n",
+            &format!(
+                "{}，官方仓库: https://github.com/zhongbai2333/Tomato-Novel-Downloader\n",
+                i18n::tr(&app.config.ui_language, "about.free_text")
+            ),
         );
         text.push_str("如果你为此付费，你被欺骗了。\n");
     }

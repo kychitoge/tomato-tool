@@ -1375,6 +1375,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "official-api")]
     fn map_report_to_deferred_marks_only_missing_ids() {
         let group = vec![
             ChapterRef {
@@ -1399,6 +1400,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "official-api")]
     fn should_escalate_full_group_retry_only_for_complete_group_failure() {
         let all_missing = ContentFetchReport {
             value: json!({"data": {}}),
