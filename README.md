@@ -1,5 +1,17 @@
 # 番茄小说下载器~~精简版~~
 
+## Giới thiệu (Tiếng Việt)
+
+Đây là repo mã nguồn của **Tomato Novel Downloader** (Rust) — công cụ tải nội dung tiểu thuyết từ hệ sinh thái Fanqie và xuất ra định dạng đọc offline (EPUB/TXT), kèm tuỳ chọn TTS.
+
+Tài liệu hướng dẫn sử dụng (ngắn gọn, dễ nắm bắt, tiếng Việt có dấu):
+- Xem tại: docs/HUONG_DAN_SU_DUNG.md
+
+README tiếng Việt (tóm tắt nhanh):
+- Xem tại: README.vi.md
+
+Ghi chú: Nội dung README phía dưới giữ nguyên theo nguồn gốc upstream.
+
 > 小小推广位：[RustEpubReader](https://github.com/zhongbai2333/RustEpubReader) <- 自研Epub阅读器，轻量快速  声明：阅读器项目不会添加下载器功能
 
 > 小小推广位：https://v.wjx.cn/vm/Qs13X5r.aspx#  <- 小问卷 若是有空帮我写一下 感激不尽（交差用的随便写）

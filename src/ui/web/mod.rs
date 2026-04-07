@@ -16,6 +16,11 @@ use crate::base_system::context::Config;
 use state::{AppState, AuthState, ConfigView, JobStore};
 
 pub fn run(config: &mut Config, password: Option<String>) -> Result<()> {
+    #[cfg(not(feature = "official-api"))]
+    {
+        config.use_official_api = false;
+    }
+
     let bind_raw = std::env::var("TOMATO_WEB_ADDR").unwrap_or_else(|_| DEFAULT_BIND.to_string());
     let bind_addrs: Vec<SocketAddr> = parse_bind_addrs(&bind_raw)?;
 

@@ -132,6 +132,11 @@ fn main() -> Result<()> {
     let mut config = load_config_from_data_dir(data_dir)?;
     config.normalize_i18n();
 
+    #[cfg(not(feature = "official-api"))]
+    {
+        config.use_official_api = false;
+    }
+
     // Handle command-line download/update modes
     if cli.download.is_some() || cli.update.is_some() {
         info!(target: "startup", "当前版本: v{}", VERSION);

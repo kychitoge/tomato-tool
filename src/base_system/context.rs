@@ -71,7 +71,7 @@ pub struct Config {
     pub save_path: String,
 
     // API 配置
-    #[serde(default = "default_true")]
+    #[serde(default = "default_use_official_api")]
     pub use_official_api: bool,
     #[serde(default)]
     pub api_endpoints: Vec<String>,
@@ -163,7 +163,7 @@ impl Default for Config {
             audiobook_tts_api_token: default_string(),
             audiobook_tts_model: default_string(),
             save_path: String::new(),
-            use_official_api: default_true(),
+            use_official_api: default_use_official_api(),
             api_endpoints: Vec::new(),
             enable_segment_comments: default_false(),
             segment_comments_top_n: default_segment_comments_top_n(),
@@ -198,179 +198,179 @@ impl ConfigSpec for Config {
         static FIELDS: [FieldMeta; 44] = [
             FieldMeta {
                 name: "old_cli",
-                description: "是否使用老版本命令行界面",
+                description: "Bật giao diện CLI cũ (không UI)",
             },
             FieldMeta {
                 name: "ui_language",
-                description: "界面语言 (zh-cn/vi/en)",
+                description: "Ngôn ngữ giao diện (zh-cn/vi/en)",
             },
             FieldMeta {
                 name: "max_workers",
-                description: "最大并发线程数",
+                description: "Số luồng xử lý đồng thời tối đa",
             },
             FieldMeta {
                 name: "request_timeout",
-                description: "请求超时时间（秒）",
+                description: "Thời gian chờ request (giây)",
             },
             FieldMeta {
                 name: "max_retries",
-                description: "最大重试次数",
+                description: "Số lần thử lại tối đa",
             },
             FieldMeta {
                 name: "max_wait_time",
-                description: "最大冷却时间, 单位ms",
+                description: "Thời gian chờ tối đa giữa các lần thử (ms)",
             },
             FieldMeta {
                 name: "min_wait_time",
-                description: "最小冷却时间, 单位ms",
+                description: "Thời gian chờ tối thiểu giữa các lần thử (ms)",
             },
             FieldMeta {
                 name: "min_connect_timeout",
-                description: "最小连接超时时间",
+                description: "Thời gian chờ kết nối tối thiểu",
             },
             FieldMeta {
                 name: "novel_format",
-                description: "保存小说格式, 可选: [txt, epub]",
+                description: "Định dạng xuất (txt/epub)",
             },
             FieldMeta {
                 name: "bulk_files",
-                description: "是否以散装形式保存小说",
+                description: "Lưu dạng nhiều file rời (bulk)",
             },
             FieldMeta {
                 name: "auto_clear_dump",
-                description: "是否自动清理缓存文件",
+                description: "Tự động dọn dẹp file cache/tạm",
             },
             FieldMeta {
                 name: "auto_open_downloaded_files",
-                description: "下载完成后自动用默认应用打开生成的小说文件/文件夹（txt/epub）",
+                description: "Tự động mở file/thư mục sau khi tải xong (txt/epub)",
             },
             FieldMeta {
                 name: "enable_audiobook",
-                description: "是否使用 Edge TTS 生成有声小说",
+                description: "Tạo sách nói bằng Edge TTS",
             },
             FieldMeta {
                 name: "audiobook_voice",
-                description: "Edge TTS 发音人",
+                description: "Giọng đọc Edge TTS",
             },
             FieldMeta {
                 name: "audiobook_rate",
-                description: "Edge TTS 语速调整，例如 +0%、-10%",
+                description: "Tốc độ đọc Edge TTS (ví dụ: +0%, -10%)",
             },
             FieldMeta {
                 name: "audiobook_volume",
-                description: "Edge TTS 音量调整，例如 +0%、-10%",
+                description: "Âm lượng Edge TTS (ví dụ: +0%, -10%)",
             },
             FieldMeta {
                 name: "audiobook_pitch",
-                description: "Edge TTS 音调调整（留空表示默认）",
+                description: "Cao độ Edge TTS (để trống = mặc định)",
             },
             FieldMeta {
                 name: "audiobook_format",
-                description: "有声小说输出格式，可选 mp3 或 wav",
+                description: "Định dạng audio (mp3/wav)",
             },
             FieldMeta {
                 name: "audiobook_concurrency",
-                description: "Edge TTS 有声小说并发生成的最大章节数",
+                description: "Số chương tạo audio đồng thời tối đa",
             },
             FieldMeta {
                 name: "audiobook_tts_provider",
-                description: "TTS 服务类型，可选 edge/third_party",
+                description: "Loại dịch vụ TTS (edge/third_party)",
             },
             FieldMeta {
                 name: "audiobook_tts_api_url",
-                description: "第三方 TTS API 地址（可填写本地服务，如 http://localhost:8000）",
+                description: "URL API TTS bên thứ ba (có thể là local, ví dụ http://localhost:8000)",
             },
             FieldMeta {
                 name: "audiobook_tts_api_token",
-                description: "第三方 TTS API Token（如无可留空）",
+                description: "Token API TTS bên thứ ba (có thể để trống)",
             },
             FieldMeta {
                 name: "audiobook_tts_model",
-                description: "第三方 TTS 模型名称或 ID",
+                description: "Tên/ID model TTS bên thứ ba",
             },
             FieldMeta {
                 name: "save_path",
-                description: "保存路径",
+                description: "Đường dẫn lưu dữ liệu",
             },
             FieldMeta {
                 name: "use_official_api",
-                description: "使用官方API",
+                description: "Sử dụng Official API (nếu có)",
             },
             FieldMeta {
                 name: "api_endpoints",
-                description: "API列表",
+                description: "Danh sách endpoint API bên thứ ba",
             },
             FieldMeta {
                 name: "enable_segment_comments",
-                description: "是否下载段评（段落评论）",
+                description: "Tải bình luận theo đoạn (segment comments)",
             },
             FieldMeta {
                 name: "segment_comments_top_n",
-                description: "每段最多保存的评论数",
+                description: "Số bình luận tối đa cho mỗi đoạn",
             },
             FieldMeta {
                 name: "segment_comments_workers",
-                description: "段评抓取的并发线程数（每章内）",
+                description: "Số luồng lấy segment comments (trong mỗi chương)",
             },
             FieldMeta {
                 name: "download_comment_images",
-                description: "是否下载评论区图片（不含头像）",
+                description: "Tải ảnh trong bình luận (không gồm avatar)",
             },
             FieldMeta {
                 name: "download_comment_avatars",
-                description: "是否下载评论区头像",
+                description: "Tải avatar trong bình luận",
             },
             FieldMeta {
                 name: "media_download_workers",
-                description: "评论图片/头像下载并发线程数",
+                description: "Số luồng tải media (ảnh/avatar)",
             },
             FieldMeta {
                 name: "blocked_media_domains",
-                description: "拒绝下载的图片域名（包含匹配）",
+                description: "Danh sách domain media bị chặn (match theo chuỗi)",
             },
             FieldMeta {
                 name: "force_convert_images_to_jpeg",
-                description: "是否强制将所有下载图片转码为 JPEG",
+                description: "Ép chuyển mọi ảnh sang JPEG",
             },
             FieldMeta {
                 name: "jpeg_retry_convert",
-                description: "若返回非 JPEG 且可解码则转码为 JPEG 保存",
+                description: "Nếu không phải JPEG nhưng giải mã được thì chuyển sang JPEG",
             },
             FieldMeta {
                 name: "jpeg_quality",
-                description: "JPEG 转码质量 (0-100)",
+                description: "Chất lượng JPEG (0-100)",
             },
             FieldMeta {
                 name: "convert_heic_to_jpeg",
-                description: "检测到 HEIC/HEIF 时转码为 JPEG",
+                description: "Chuyển HEIC/HEIF sang JPEG",
             },
             FieldMeta {
                 name: "keep_heic_original",
-                description: "无法转码时是否保留 .heic/.heif",
+                description: "Giữ file gốc .heic/.heif nếu không chuyển được",
             },
             FieldMeta {
                 name: "first_line_indent_em",
-                description: "EPUB 段落首行缩进 em 数",
+                description: "Thụt đầu dòng đoạn văn trong EPUB (đơn vị em)",
             },
             FieldMeta {
                 name: "media_limit_per_chapter",
-                description: "每章最多下载的媒体数（0 表示不限制）",
+                description: "Số media tối đa mỗi chương (0 = không giới hạn)",
             },
             FieldMeta {
                 name: "media_max_dimension_px",
-                description: "图片最长边像素上限，>0 时缩放并转成 JPEG",
+                description: "Giới hạn cạnh dài nhất của ảnh (px); >0 sẽ resize và chuyển JPEG",
             },
             FieldMeta {
                 name: "allow_overwrite_files",
-                description: "是否允许覆盖已存在的文件",
+                description: "Cho phép ghi đè file đã tồn tại",
             },
             FieldMeta {
                 name: "preferred_book_name_field",
-                description: "优先使用的书名字段 (book_name/original_book_name/book_short_name/ask_after_download)",
+                description: "Ưu tiên trường tên sách (book_name/original_book_name/book_short_name/ask_after_download)",
             },
             FieldMeta {
                 name: "ask_format_after_download",
-                description: "下载完成后询问用户选择输出格式 (true/false)",
+                description: "Hỏi chọn định dạng xuất sau khi tải xong (true/false)",
             },
         ];
         &FIELDS
@@ -652,6 +652,10 @@ fn default_false() -> bool {
 
 fn default_true() -> bool {
     true
+}
+
+fn default_use_official_api() -> bool {
+    false
 }
 
 fn default_max_workers() -> usize {

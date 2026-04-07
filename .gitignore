@@ -80,6 +80,7 @@ docs/_build/
 # PyBuilder
 .pybuilder/
 target/
+target-langmod/
 
 # Jupyter Notebook
 .ipynb_checkpoints

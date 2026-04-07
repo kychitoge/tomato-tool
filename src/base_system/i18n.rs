@@ -25,19 +25,23 @@ pub fn default_edge_tts_voice(lang: &str) -> &'static str {
 
 pub fn tr(lang: &str, key: &str) -> Cow<'static, str> {
     match (normalize_lang_tag(lang), key) {
-        (LANG_VI, "noui.project") => Cow::Borrowed("Du an"),
-        (LANG_VI, "noui.fork") => Cow::Borrowed("Fork tu"),
-        (LANG_VI, "noui.author") => Cow::Borrowed("Tac gia"),
-        (LANG_VI, "noui.early") => Cow::Borrowed("Ma nguon giai doan dau"),
-        (LANG_VI, "noui.free_title") => Cow::Borrowed("[Tuyen bo mien phi]"),
-        (LANG_VI, "noui.free_text") => Cow::Borrowed("Chuong trinh nay hoan toan mien phi, neu co kenh thu phi thi hay canh giac!"),
-        (LANG_VI, "about.project") => Cow::Borrowed("Du an"),
-        (LANG_VI, "about.fork") => Cow::Borrowed("Fork tu"),
-        (LANG_VI, "about.author") => Cow::Borrowed("Tac gia"),
-        (LANG_VI, "about.free_title") => Cow::Borrowed("===== Thong bao mien phi ====="),
-        (LANG_VI, "about.free_text") => Cow::Borrowed("Chuong trinh nay hoan toan mien phi"),
-        (LANG_VI, "web.free_text") => Cow::Borrowed("Chuong trinh nay hoan toan mien phi"),
-        (LANG_VI, "web.free_warn") => Cow::Borrowed("Neu thay kenh thu phi, xin dung bi lua!"),
+        (LANG_VI, "noui.project") => Cow::Borrowed("Dự án"),
+        (LANG_VI, "noui.fork") => Cow::Borrowed("Fork từ"),
+        (LANG_VI, "noui.author") => Cow::Borrowed("Tác giả"),
+        (LANG_VI, "noui.early") => Cow::Borrowed("Mã nguồn giai đoạn đầu"),
+        (LANG_VI, "noui.free_title") => Cow::Borrowed("[Tuyên bố miễn phí]"),
+        (LANG_VI, "noui.free_text") => Cow::Borrowed(
+            "Chương trình này hoàn toàn miễn phí. Nếu bạn thấy kênh phân phối thu phí, vui lòng cảnh giác để tránh bị lừa đảo.",
+        ),
+        (LANG_VI, "about.project") => Cow::Borrowed("Dự án"),
+        (LANG_VI, "about.fork") => Cow::Borrowed("Fork từ"),
+        (LANG_VI, "about.author") => Cow::Borrowed("Tác giả"),
+        (LANG_VI, "about.free_title") => Cow::Borrowed("===== THÔNG BÁO MIỄN PHÍ ====="),
+        (LANG_VI, "about.free_text") => {
+            Cow::Borrowed("Chương trình này hoàn toàn miễn phí.")
+        }
+        (LANG_VI, "web.free_text") => Cow::Borrowed("Chương trình này hoàn toàn miễn phí."),
+        (LANG_VI, "web.free_warn") => Cow::Borrowed("Nếu bạn thấy kênh thu phí, vui lòng cảnh giác để tránh bị lừa đảo."),
 
         (LANG_EN, "noui.project") => Cow::Borrowed("Project"),
         (LANG_EN, "noui.fork") => Cow::Borrowed("Fork from"),

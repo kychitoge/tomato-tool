@@ -2,9 +2,13 @@
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::OnceLock;
 use std::time::Duration;
 
 use anyhow::{Result, anyhow};
+use reqwest::blocking::Client;
+use reqwest::header::{ACCEPT, ACCEPT_ENCODING, CONNECTION, HeaderMap, HeaderValue, USER_AGENT};
+use serde_json::{Value, json};
 
 use super::models::ChapterRef;
 use crate::base_system::context::Config;
@@ -182,4 +186,104 @@ pub(crate) fn fetch_group_third_party(
     }
 
     Err(anyhow!("第三方 API 请求重试耗尽"))
+}
+
+fn re_initial_state() -> &'static regex::Regex {
+    static R: OnceLock<regex::Regex> = OnceLock::new();
+    R.get_or_init(|| {
+        regex::Regex::new(r#"(?s)window\.__INITIAL_STATE__\s*=\s*(\{.*?\})\s*;"#).unwrap()
+    })
+}
+
+fn parse_reader_page(
+    html: &str,
+    fallback_id: &str,
+    fallback_title: &str,
+) -> Option<(String, String, String)> {
+    let caps = re_initial_state().captures(html)?;
+    let raw = caps.get(1)?.as_str();
+    let v: Value = serde_json::from_str(raw).ok()?;
+    let chapter = v.pointer("/reader/chapterData")?;
+    let id = chapter
+        .get("itemId")
+        .and_then(Value::as_str)
+        .or_else(|| chapter.get("item_id").and_then(Value::as_str))
+        .or_else(|| chapter.get("id").and_then(Value::as_str))
+        .unwrap_or(fallback_id)
+        .to_string();
+    let title = chapter
+        .get("title")
+        .and_then(Value::as_str)
+        .or_else(|| chapter.get("chapterTitle").and_then(Value::as_str))
+        .unwrap_or(fallback_title)
+        .to_string();
+    let content = chapter
+        .get("content")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
+    if content.trim().is_empty() {
+        None
+    } else {
+        Some((id, title, content))
+    }
+}
+
+pub(crate) fn fetch_group_web_reader_public(cfg: &Config, group: &[ChapterRef]) -> Result<Value> {
+    let mut headers = HeaderMap::new();
+    headers.insert(ACCEPT_ENCODING, HeaderValue::from_static("identity"));
+    headers.insert(CONNECTION, HeaderValue::from_static("keep-alive"));
+    headers.insert(
+        ACCEPT,
+        HeaderValue::from_static("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"),
+    );
+    headers.insert(
+        USER_AGENT,
+        HeaderValue::from_static(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36",
+        ),
+    );
+
+    let timeout_ms = cfg.request_timeout.saturating_mul(1000).max(100);
+    let connect_timeout_ms = ms_from_connect_timeout_secs(cfg.min_connect_timeout).unwrap_or(1000);
+    let client = Client::builder()
+        .default_headers(headers)
+        .timeout(Duration::from_millis(timeout_ms))
+        .connect_timeout(Duration::from_millis(connect_timeout_ms.max(100)))
+        .build()?;
+
+    let tries = cfg.max_retries.max(1);
+    let mut out = serde_json::Map::new();
+
+    for ch in group {
+        let mut saved = false;
+        for attempt in 0..tries {
+            let url = format!("https://fanqienovel.com/reader/{}", ch.id);
+            let resp = client.get(&url).send();
+            match resp {
+                Ok(r) => match r.error_for_status() {
+                    Ok(ok) => match ok.text() {
+                        Ok(html) => {
+                            if let Some((item_id, title, content)) =
+                                parse_reader_page(&html, &ch.id, &ch.title)
+                            {
+                                out.insert(item_id, json!({"title": title, "content": content}));
+                                saved = true;
+                                break;
+                            }
+                        }
+                        Err(_) => {}
+                    },
+                    Err(_) => {}
+                },
+                Err(_) => {}
+            }
+            sleep_backoff(cfg, attempt);
+        }
+        if !saved {
+            out.insert(ch.id.clone(), json!({"title": ch.title, "content": ""}));
+        }
+    }
+
+    Ok(json!({"data": out}))
 }

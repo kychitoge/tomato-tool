@@ -261,6 +261,11 @@ fn normalize_config(cfg: &mut Config) {
     cfg.audiobook_tts_provider = cfg.audiobook_tts_provider.trim().to_ascii_lowercase();
     cfg.preferred_book_name_field = cfg.preferred_book_name_field.trim().to_ascii_lowercase();
     cfg.normalize_i18n();
+
+    #[cfg(not(feature = "official-api"))]
+    {
+        cfg.use_official_api = false;
+    }
 }
 
 fn validate_config(cfg: &Config) -> Result<(), String> {

@@ -25,7 +25,9 @@ use super::progress::{make_reporter, segment_enabled};
 use super::segment_pool::{
     SegmentCommentPool, count_segment_comment_cache_files, extract_item_version_map,
 };
-use super::third_party::{fetch_group_third_party, validate_endpoints};
+use super::third_party::{
+    fetch_group_third_party, fetch_group_web_reader_public, validate_endpoints,
+};
 
 #[cfg(feature = "official-api")]
 use tomato_novel_official_api::{ContentFetchReport, FanqieClient};
@@ -849,8 +851,12 @@ fn download_third_party_flow(
     cancel: Option<&Arc<AtomicBool>>,
     seg_pool: Option<&SegmentCommentPool>,
 ) -> Result<DownloadResult> {
-    if config.api_endpoints.is_empty() {
-        return Err(anyhow!("use_official_api=false 时，api_endpoints 不能为空"));
+    let use_web_reader_fallback = config.api_endpoints.iter().all(|s| s.trim().is_empty());
+    if use_web_reader_fallback {
+        info!(
+            target: "download",
+            "未配置第三方 API 地址池，回退到 fanqienovel reader 网页抓取模式"
+        );
     }
 
     let probe_chapter_id = pending_chapters
@@ -861,23 +867,31 @@ fn download_third_party_flow(
         return Err(anyhow!("章节列表为空，无法预热第三方 API"));
     }
 
-    let mut valid = validate_endpoints(config, probe_chapter_id);
-    if valid.is_empty() {
-        valid = config
-            .api_endpoints
-            .iter()
-            .map(|s| s.trim().to_string())
-            .filter(|s| !s.is_empty())
-            .collect();
-    }
-    if valid.is_empty() {
-        return Err(anyhow!("第三方 API 地址池为空"));
-    }
+    let (endpoints, picker) = if use_web_reader_fallback {
+        (
+            Arc::new(std::sync::Mutex::new(Vec::<String>::new())),
+            Arc::new(AtomicUsize::new(0)),
+        )
+    } else {
+        let mut valid = validate_endpoints(config, probe_chapter_id);
+        if valid.is_empty() {
+            valid = config
+                .api_endpoints
+                .iter()
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+        }
+        if valid.is_empty() {
+            return Err(anyhow!("第三方 API 地址池为空"));
+        }
 
-    info!(target: "download", endpoints = valid.len(), "第三方 API 地址池预热完成");
-
-    let endpoints = Arc::new(std::sync::Mutex::new(valid));
-    let picker = Arc::new(AtomicUsize::new(0));
+        info!(target: "download", endpoints = valid.len(), "第三方 API 地址池预热完成");
+        (
+            Arc::new(std::sync::Mutex::new(valid)),
+            Arc::new(AtomicUsize::new(0)),
+        )
+    };
     let worker_count = config.max_workers.max(1);
     let epub_mode = config.novel_format.eq_ignore_ascii_case("epub");
 
@@ -906,7 +920,11 @@ fn download_third_party_flow(
                     let _ = tx.send(Err(anyhow!("用户停止下载")));
                     return;
                 }
-                let value = fetch_group_third_party(&cfg, &endpoints, &picker, &group, epub_mode);
+                let value = if use_web_reader_fallback {
+                    fetch_group_web_reader_public(&cfg, &group)
+                } else {
+                    fetch_group_third_party(&cfg, &endpoints, &picker, &group, epub_mode)
+                };
                 let _ = tx.send(value.map(|v| (group, v)));
             }
         });
