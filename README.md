@@ -1,17 +1,5 @@
 # 番茄小说下载器~~精简版~~
 
-## Giới thiệu (Tiếng Việt)
-
-Đây là repo mã nguồn của **Tomato Novel Downloader** (Rust) — công cụ tải nội dung tiểu thuyết từ hệ sinh thái Fanqie và xuất ra định dạng đọc offline (EPUB/TXT), kèm tuỳ chọn TTS.
-
-Tài liệu hướng dẫn sử dụng (ngắn gọn, dễ nắm bắt, tiếng Việt có dấu):
-- Xem tại: docs/HUONG_DAN_SU_DUNG.md
-
-README tiếng Việt (tóm tắt nhanh):
-- Xem tại: README.vi.md
-
-Ghi chú: Nội dung README phía dưới giữ nguyên theo nguồn gốc upstream.
-
 > 小小推广位：[RustEpubReader](https://github.com/zhongbai2333/RustEpubReader) <- 自研Epub阅读器，轻量快速  声明：阅读器项目不会添加下载器功能
 
 > 小小推广位：https://v.wjx.cn/vm/Qs13X5r.aspx#  <- 小问卷 若是有空帮我写一下 感激不尽（交差用的随便写）
@@ -39,7 +27,7 @@ Ghi chú: Nội dung README phía dưới giữ nguyên theo nguồn gốc upstr
 
 ## 我该如何使用？
 
-根据自己的系统版本在[Releases](https://github.com/kychitoge/tomato-tool/releases)列表下载可执行文件，并运行
+根据自己的系统版本在[Releases](https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases)列表下载可执行文件，并运行
 首次下载新书请优先使用 TUI 或 Web UI；CLI 仅保留更新本地已有小说的能力
 
 ### 命令行模式（非交互）
@@ -254,7 +242,7 @@ cargo build --release --no-default-features --features no-official-api
     下载termux(链接:(<https://github.com/termux/termux-app/releases>) 并安装，然后运行部署脚本：
 
     ```sh
-    bash <(curl -sL https://raw.githubusercontent.com/kychitoge/tomato-tool/main/installer.sh)
+    bash <(curl -sL https://raw.githubusercontent.com/zhongbai2333/Tomato-Novel-Downloader/main/installer.sh)
     ```
 
     安装完成后，推荐用 Web UI 启动（示例）：
@@ -275,7 +263,7 @@ cargo build --release --no-default-features --features no-official-api
     `Linux` 和 `MacOS` 使用终端运行，可以使用一键部署脚本：
 
     ```sh
-    bash <(curl -sL https://raw.githubusercontent.com/kychitoge/tomato-tool/main/installer.sh)
+    bash <(curl -sL https://raw.githubusercontent.com/zhongbai2333/Tomato-Novel-Downloader/main/installer.sh)
     ```
 
 4. 小说id是什么？在哪里获取？
@@ -287,7 +275,7 @@ cargo build --release --no-default-features --features no-official-api
 
 5. 我是纯小白，程序在哪里下载啊
 
-    直接点击此链接(<https://github.com/kychitoge/tomato-tool/releases>)先找到最新版本，然后在最新版本中找到”Assets”并点击来展开内容(如果已展开就不必进行此操作)。在展开的内容中找到对应程序，点击下载即可
+    直接点击此链接(<https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases>)先找到最新版本，然后在最新版本中找到”Assets”并点击来展开内容(如果已展开就不必进行此操作)。在展开的内容中找到对应程序，点击下载即可
 
 ## 注意事项（必看）
 
