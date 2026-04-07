@@ -198,7 +198,7 @@ pub(super) fn parse_range_input(input: &str, total: usize) -> Result<Option<Chap
 
     let parts: Vec<&str> = trimmed.split('-').collect();
     if parts.len() > 2 {
-        return Err(anyhow!("Dinh dang phai la start-end, vi du 1-10"));
+        return Err(anyhow!("格式应为 start-end，例如 1-10"));
     }
 
     let start_part = parts.first().copied().unwrap_or("").trim();
@@ -209,24 +209,24 @@ pub(super) fn parse_range_input(input: &str, total: usize) -> Result<Option<Chap
     } else {
         start_part
             .parse::<usize>()
-            .map_err(|_| anyhow!("Chuong bat dau phai la so"))?
+            .map_err(|_| anyhow!("起始章节需为数字"))?
     };
     let end = if end_part.is_empty() {
         total
     } else {
         end_part
             .parse::<usize>()
-            .map_err(|_| anyhow!("Chuong ket thuc phai la so"))?
+            .map_err(|_| anyhow!("结束章节需为数字"))?
     };
 
     if start == 0 || end == 0 {
-        return Err(anyhow!("So chuong phai lon hon 0"));
+        return Err(anyhow!("章节编号需大于 0"));
     }
     if start > end {
-        return Err(anyhow!("Chuong bat dau khong duoc lon hon chuong ket thuc"));
+        return Err(anyhow!("起始章节不能大于结束章节"));
     }
     if start > total {
-        return Err(anyhow!("Chuong bat dau vuot qua tong so chuong"));
+        return Err(anyhow!("起始章节超过目录长度"));
     }
 
     Ok(Some(ChapterRange {
@@ -248,8 +248,8 @@ pub(super) fn start_preview_task(app: &mut App, book_id: String, hint: BookMeta)
     app.preview_modal_scroll = 0;
     app.preview_modal_scroll_max = 0;
     app.last_preview_desc_area = None;
-    info!(target: "ui", book_id = %book_id, "Bat dau tai danh muc/xem truoc");
-    start_spinner(app, format!("Dang tai danh muc: {book_id}"));
+    info!(target: "ui", book_id = %book_id, "开始加载目录/预览");
+    start_spinner(app, format!("加载目录: {book_id}"));
     let tx = app.worker_tx.clone();
     let cfg = app.config.clone();
     thread::spawn(move || {
@@ -288,7 +288,7 @@ pub(super) fn confirm_preview(app: &mut App) -> Result<()> {
         match parse_range_input(input, total) {
             Ok(r) => r,
             Err(err) => {
-                app.status = format!("Pham vi khong hop le: {err}");
+                app.status = format!("范围无效: {err}");
                 return Ok(());
             }
         }
@@ -319,7 +319,7 @@ pub(super) fn cancel_preview(app: &mut App) {
     app.last_preview_desc_area = None;
     app.view = View::Home;
     app.focus = Focus::Input;
-    app.status = "Da huy xem truoc".to_string();
+    app.status = "已取消预览".to_string();
     app.download_cancel_flag = None;
     app.stop_button_area = None;
 }
@@ -480,11 +480,11 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
             .and_then(|p| p.plan.meta.description.as_deref())
             .map(|s| s.trim())
             .filter(|s| !s.is_empty())
-            .unwrap_or("Chua co mo ta");
+            .unwrap_or("暂无简介");
 
         let desc_block = Block::default()
             .borders(Borders::ALL)
-            .title("Mo ta (↑↓/lan chuot)");
+            .title("简介 (↑↓/滚轮)");
         frame.render_widget(desc_block.clone(), desc_area);
         let inner = desc_block.inner(desc_area);
 
@@ -554,15 +554,15 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
     let show_comments = app.config.enable_segment_comments && snap.comment_total > 0;
     let mut items: Vec<(&str, usize, usize, Color)> = Vec::new();
     items.push((
-        "Nhom tai",
+        "组下载",
         snap.group_done,
         snap.group_total.max(1),
         Color::LightCyan,
     ));
     items.push((
         match snap.save_phase {
-            SavePhase::Audiobook => "Sach noi",
-            SavePhase::TextSave => "Luu van ban",
+            SavePhase::Audiobook => "有声书",
+            SavePhase::TextSave => "正文保存",
         },
         snap.saved_chapters,
         snap.chapter_total.max(1),
@@ -570,20 +570,20 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
     ));
     if show_comments {
         items.push((
-            "Lay binh luan doan",
+            "段评抓取",
             snap.comment_fetch,
             snap.comment_total.max(1),
             Color::Yellow,
         ));
         items.push((
-            "Luu binh luan doan",
+            "段评保存",
             snap.comment_saved,
             snap.comment_total.max(1),
             Color::Magenta,
         ));
     }
 
-    let inner = Block::default().borders(Borders::ALL).title("Tien do");
+    let inner = Block::default().borders(Borders::ALL).title("进度");
     frame.render_widget(inner.clone(), progress_area);
 
     let inner_area = Rect {
@@ -624,7 +624,7 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
 
         if let Some(btn_area) = rows.last() {
             let txt = if app.download_cancel_flag.is_some() {
-                "[ Dung tai ] (S/nhap chuot)"
+                "[ 停止下载 ] (S/点击)"
             } else {
                 ""
             };
@@ -671,7 +671,7 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
                         .meta
                         .book_name
                         .clone()
-                        .unwrap_or_else(|| "Xem truoc".to_string()),
+                        .unwrap_or_else(|| "预览".to_string()),
                     p.plan.meta.original_book_name.clone(),
                     p.plan.meta.author.clone(),
                     p.plan.chapters.len(),
@@ -679,7 +679,7 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
                     &p.plan.meta,
                 )
             })
-            .unwrap_or(("Xem truoc".to_string(), None, None, 0, 0, &fallback_meta));
+            .unwrap_or(("预览".to_string(), None, None, 0, 0, &fallback_meta));
 
         let mut title_line = format!("《{}》", title);
         if let Some(orig) = original_title.as_ref()
@@ -691,15 +691,15 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
         let mut meta_lines: Vec<Line> = Vec::new();
         let mut info_plain_lines: Vec<String> = Vec::new();
         let mut row1: Vec<String> = Vec::new();
-        row1.push(format!("Chuong: {} (da tai {})", total, downloaded));
+        row1.push(format!("章节: {} (已下载 {})", total, downloaded));
         if let Some(done) = meta.finished {
-            let label = if done { "Da hoan" } else { "Dang ra" };
-            row1.push(format!("Trang thai: {}", label));
+            let label = if done { "完结" } else { "连载" };
+            row1.push(format!("状态: {}", label));
         }
         if let Some(author) = author.as_ref()
             && !author.is_empty()
         {
-            row1.push(format!("Tac gia: {}", author));
+            row1.push(format!("作者: {}", author));
         }
         let row1_s = row1.join(" | ");
         meta_lines.push(Line::from(row1_s.clone()));
@@ -708,26 +708,26 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
         if let Some(desc) = meta.description.as_ref() {
             if !desc.is_empty() {
                 let desc = desc.trim();
-                meta_lines.push(Line::from(format!("Mo ta: {}", desc)));
-                info_plain_lines.push(format!("Mo ta: {}", desc));
+                meta_lines.push(Line::from(format!("简介: {}", desc)));
+                info_plain_lines.push(format!("简介: {}", desc));
             } else {
-                meta_lines.push(Line::from("Mo ta: chua co"));
-                info_plain_lines.push("Mo ta: chua co".to_string());
+                meta_lines.push(Line::from("简介: 暂无"));
+                info_plain_lines.push("简介: 暂无".to_string());
             }
         } else {
-            meta_lines.push(Line::from("Mo ta: chua co"));
-            info_plain_lines.push("Mo ta: chua co".to_string());
+            meta_lines.push(Line::from("简介: 暂无"));
+            info_plain_lines.push("简介: 暂无".to_string());
         }
 
         let mut row2: Vec<String> = Vec::new();
         if let Some(score) = meta.score {
-            row2.push(format!("Diem: {:.1}", score));
+            row2.push(format!("评分: {:.1}", score));
         }
         if let Some(words) = meta.word_count {
-            row2.push(format!("So chu: {}", format_word_count(words)));
+            row2.push(format!("字数: {}", format_word_count(words)));
         }
         if let Some(reads) = meta.read_count_text.as_ref().or(meta.read_count.as_ref()) {
-            row2.push(format!("Luot doc: {}", reads));
+            row2.push(format!("阅读: {}", reads));
         }
         if !row2.is_empty() {
             let row2_s = row2.join(" | ");
@@ -739,10 +739,10 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
         if let Some(cat) = meta.category.as_ref()
             && !cat.is_empty()
         {
-            row3.push(format!("The loai: {}", cat));
+            row3.push(format!("类别: {}", cat));
         }
         if !meta.tags.is_empty() {
-            row3.push(format!("The: {}", meta.tags.join(" | ")));
+            row3.push(format!("标签: {}", meta.tags.join(" | ")));
         }
         if !row3.is_empty() {
             let row3_s = row3.join(" | ");
@@ -754,12 +754,12 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
         if let Some(first) = meta.first_chapter_title.as_ref()
             && !first.is_empty()
         {
-            row4.push(format!("Chuong dau: {}", truncate(first, 50)));
+            row4.push(format!("首章: {}", truncate(first, 50)));
         }
         if let Some(last) = meta.last_chapter_title.as_ref()
             && !last.is_empty()
         {
-            row4.push(format!("Chuong cuoi: {}", truncate(last, 50)));
+            row4.push(format!("末章: {}", truncate(last, 50)));
         }
         if !row4.is_empty() {
             let row4_s = row4.join(" | ");
@@ -797,10 +797,10 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
             .block(
                 Block::default()
                     .borders(Borders::ALL)
-                    .title("Pham vi tai (de trong = tat ca)"),
+                    .title("下载范围 (空=全部)"),
             );
 
-        let buttons = ["Xac nhan", "Huy"];
+        let buttons = ["确定", "取消"];
         let button_items: Vec<ListItem> = buttons.iter().map(|b| ListItem::new(*b)).collect();
         let button_style = if app.preview_focus == PreviewFocus::Buttons {
             Style::default().fg(Color::LightCyan)
@@ -808,7 +808,7 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
             Style::default()
         };
         let button_list = List::new(button_items)
-            .block(Block::default().borders(Borders::ALL).title("Thao tac"))
+            .block(Block::default().borders(Borders::ALL).title("操作"))
             .highlight_style(button_style.add_modifier(Modifier::BOLD))
             .highlight_symbol(">> ");
 
@@ -856,7 +856,7 @@ pub(super) fn draw_preview(frame: &mut ratatui::Frame, app: &mut App) {
         frame.render_widget(
             Block::default()
                 .borders(Borders::ALL)
-                .title("Xem truoc va tai (↑↓/lan chuot)")
+                .title("预览与下载 (↑↓/滚轮)")
                 .title_alignment(Alignment::Center),
             modal,
         );
@@ -917,11 +917,11 @@ pub(super) fn apply_preview_ready(app: &mut App, pending: PendingDownload) {
         },
         comment_saved: 0,
     });
-    app.status = format!("Xem truoc: 《{}》 tong {} chuong, da tai {}", title, total, downloaded);
+    app.status = format!("预览: 《{}》 共 {} 章，已下载 {}", title, total, downloaded);
 }
 
 pub(super) fn apply_preview_error(app: &mut App, err: anyhow::Error) {
-    app.status = format!("Tai danh muc that bai: {err}");
-    app.push_message(format!("Tai danh muc that bai: {err}"));
-    warn!(target: "ui", "Tai danh muc that bai: {err}");
+    app.status = format!("加载目录失败: {err}");
+    app.push_message(format!("加载目录失败: {err}"));
+    warn!(target: "ui", "加载目录失败: {err}");
 }

@@ -58,19 +58,19 @@ fn resolve_local_preview_cover_key(
                     || ext.eq_ignore_ascii_case(".jpg")
                     || ext.eq_ignore_ascii_case(".jpeg");
                 if !is_jpeg {
-                    debug!(url = u, mime, ext, "Bia khong phai dinh dang JPEG, bo qua");
+                    debug!(url = u, mime, ext, "封面非 JPEG 格式，跳过");
                     continue;
                 }
                 if let Some(key) = parse_cover_key(&path) {
-                    debug!(url = u, key = %key, "Da cache bia JPEG thanh cong");
+                    debug!(url = u, key = %key, "成功缓存封面 JPEG");
                     return Some(key);
                 }
             }
             Ok(None) => {
-                debug!(url = u, "Tai/chuyen ma bia tra ve None");
+                debug!(url = u, "封面下载/转码返回 None");
             }
             Err(e) => {
-                warn!(url = u, error = %e, "Tai bia that bai");
+                warn!(url = u, error = %e, "封面下载失败");
             }
         }
     }
@@ -78,7 +78,7 @@ fn resolve_local_preview_cover_key(
     warn!(
         cover_url = ?meta.cover_url,
         detail_cover_url = ?meta.detail_cover_url,
-        "Tat ca URL bia de cu deu lay that bai"
+        "所有封面候选 URL 均获取失败"
     );
     None
 }
@@ -113,11 +113,11 @@ fn resolve_local_preview_cover_key_with_web_fallback(
     }
 
     // 第二轮：通过 web 页面抓取封面 URL（不同来源，URL 可能不同）
-    debug!(book_id, "Lay bia tu API chinh thuc that bai, thu lay URL bia tu trang web");
+    debug!(book_id, "官方 API 封面获取失败，尝试 web 页面抓取封面 URL");
     let web = match FanqieWebNetwork::new(FanqieWebConfig::default()) {
         Ok(w) => w,
         Err(e) => {
-            warn!(error = %e, "Khoi tao FanqieWebNetwork that bai");
+            warn!(error = %e, "初始化 FanqieWebNetwork 失败");
             return None;
         }
     };
@@ -128,11 +128,11 @@ fn resolve_local_preview_cover_key_with_web_fallback(
         ?cover_url,
         ?detail_cover_url,
         ?html_img_cover_url,
-        "Ket qua lay URL bia tu trang web"
+        "web 页面抓取封面 URL 结果"
     );
 
     if cover_url.is_none() && detail_cover_url.is_none() && html_img_cover_url.is_none() {
-        warn!(book_id, "Trang web cung khong tim thay URL bia");
+        warn!(book_id, "web 页面也未找到封面 URL");
         return None;
     }
 
@@ -282,11 +282,11 @@ pub(crate) async fn api_preview_cover_by_book(
             .await
             .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
             .ok_or_else(|| {
-                warn!(book_id = %book_id, "Doc file cache bia that bai");
+                warn!(book_id = %book_id, "封面缓存文件读取失败");
                 StatusCode::NOT_FOUND
             })?
     } else {
-        warn!(book_id = %book_id, "Khong the lay bia (ca API chinh thuc va trang web deu khong co URL bia hop le)");
+        warn!(book_id = %book_id, "无法获取封面（官方 API 和 web 页面均未找到可用封面 URL）");
         return Err(StatusCode::NOT_FOUND);
     };
 
@@ -326,7 +326,7 @@ pub(crate) async fn api_preview_cleanup(
         .clone();
 
     if !cfg.auto_clear_dump {
-        debug!(book_id = %book_id, "auto_clear_dump chua bat, bo qua don dep xem truoc");
+        debug!(book_id = %book_id, "auto_clear_dump 未开启，跳过预览清理");
         return StatusCode::NO_CONTENT;
     }
 
@@ -342,7 +342,7 @@ pub(crate) async fn api_preview_cleanup(
         Ok(Ok(p)) => p,
         _ => {
             // plan 获取失败，无法定位文件夹，静默返回
-            debug!(book_id = %book_id, "cleanup: khong lay duoc ke hoach tai, bo qua");
+            debug!(book_id = %book_id, "cleanup: 无法获取下载计划，跳过");
             return StatusCode::NO_CONTENT;
         }
     };
@@ -350,7 +350,7 @@ pub(crate) async fn api_preview_cleanup(
     let book_name = match plan.meta.book_name.as_deref() {
         Some(n) => n.to_string(),
         None => {
-            debug!(book_id = %book_id, "cleanup: plan khong co book_name, bo qua");
+            debug!(book_id = %book_id, "cleanup: plan 中无 book_name，跳过");
             return StatusCode::NO_CONTENT;
         }
     };
@@ -393,7 +393,7 @@ fn cleanup_preview_cover_dir(
     }
     if entries.is_empty() {
         let _ = std::fs::remove_dir_all(&dir);
-        info!(path = %dir.display(), "cleanup: xoa thu muc xem truoc rong");
+        info!(path = %dir.display(), "cleanup: 删除空的预览文件夹");
         return;
     }
 
@@ -420,7 +420,7 @@ fn cleanup_preview_cover_dir(
 
     // 如果存在非封面文件，中止清理
     if entries.iter().any(|p| !is_cover_like(p)) {
-        debug!(path = %dir.display(), "cleanup: thu muc co file khong phai bia, bo qua");
+        debug!(path = %dir.display(), "cleanup: 文件夹包含非封面文件，跳过");
         return;
     }
 
@@ -430,6 +430,6 @@ fn cleanup_preview_cover_dir(
 
     if is_empty_dir(&dir).unwrap_or(false) {
         let _ = std::fs::remove_dir_all(&dir);
-        info!(path = %dir.display(), "cleanup: da don dep thu muc bia tao boi che do xem truoc");
+        info!(path = %dir.display(), "cleanup: 已清理预览产生的封面文件夹");
     }
 }

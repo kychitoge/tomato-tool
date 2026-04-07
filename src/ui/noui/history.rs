@@ -9,23 +9,23 @@ pub(super) fn show_history_menu() -> Result<()> {
 
     loop {
         let items = read_download_history(50, keyword.as_deref());
-        println!("\n===== Lịch sử tải xuống (50 bản ghi gần nhất) =====");
+        println!("\n===== 下载历史（最近 50 条） =====");
         if let Some(k) = keyword.as_deref() {
-            println!("Từ khóa lọc: {}", k);
+            println!("过滤关键字: {}", k);
         }
 
         if items.is_empty() {
-            println!("Không có bản ghi");
+            println!("暂无记录");
         } else {
             for (i, it) in items.iter().enumerate() {
                 println!(
-                    "{:>2}. [{}] 《{}》({}) | Tác giả: {} | {} | Trạng thái: {}",
+                    "{:>2}. [{}] 《{}》({}) | 作者: {} | {} | 状态: {}",
                     i + 1,
                     it.timestamp,
                     it.book_name,
                     it.book_id,
                     if it.author.trim().is_empty() {
-                        "Không rõ"
+                        "未知"
                     } else {
                         it.author.trim()
                     },
@@ -35,8 +35,8 @@ pub(super) fn show_history_menu() -> Result<()> {
             }
         }
 
-        println!("\nThao tác: Enter=làm mới, f=đặt từ khóa lọc, c=xóa lọc, q=quay lại");
-        let cmd = super::read_line("Chọn: ")?;
+        println!("\n操作：Enter=刷新, f=设置过滤关键字, c=清空过滤, q=返回");
+        let cmd = super::read_line("选择: ")?;
         let cmd = cmd.trim();
         if cmd.is_empty() {
             continue;
@@ -45,10 +45,10 @@ pub(super) fn show_history_menu() -> Result<()> {
             break;
         }
         if cmd.eq_ignore_ascii_case("f") {
-            let q = super::read_line("Nhập từ khóa tên sách/tác giả/ID: ")?;
+            let q = super::read_line("输入书名/作者/ID关键字: ")?;
             let q = q.trim();
             if q.is_empty() {
-                println!("Từ khóa trống, giữ nguyên bộ lọc hiện tại.\n");
+                println!("关键字为空，保持当前过滤。\n");
             } else {
                 keyword = Some(q.to_string());
             }

@@ -8,7 +8,7 @@ pub(super) fn handle_event_cover(app: &mut App, event: Event) -> Result<()> {
         Event::Key(key) if key.kind == KeyEventKind::Press => match key.code {
             KeyCode::Char('q') | KeyCode::Esc | KeyCode::Enter => {
                 app.view = app.previous_view;
-                app.status = "Quay lai".to_string();
+                app.status = "返回".to_string();
             }
             _ => {}
         },
@@ -37,33 +37,33 @@ pub(super) fn show_cover(
     let candidates = cover_candidates(app, book_id, title, folder);
     let Some(path) = candidates.into_iter().find(|p| p.exists()) else {
         app.view = View::Cover;
-        app.status = "Khong tim thay file bia".to_string();
+        app.status = "未找到封面文件".to_string();
         return Ok(());
     };
 
-    let img = image::open(&path).with_context(|| format!("Doc file bia that bai: {}", path.display()))?;
+    let img = image::open(&path).with_context(|| format!("读取封面失败: {}", path.display()))?;
     let (term_w, term_h) = crossterm::terminal::size().unwrap_or((80, 24));
     let ascii = image_to_ascii(img, term_w, term_h);
     app.cover_lines = if ascii.is_empty() {
-        vec!["Anh bia qua nho, khong the hien thi".to_string()]
+        vec!["封面太小，无法显示".to_string()]
     } else {
         ascii
     };
     app.view = View::Cover;
-    app.status = format!("Bia: {} (nhan q de quay lai)", path.display());
+    app.status = format!("封面: {} (按 q 返回)", path.display());
     Ok(())
 }
 
 pub(super) fn draw_cover(frame: &mut ratatui::Frame, app: &mut App) {
     let (main, log_area) = super::split_with_log(frame.size());
     let title = if app.cover_title.is_empty() {
-        "Xem truoc bia".to_string()
+        "封面预览".to_string()
     } else {
         app.cover_title.clone()
     };
 
     let lines: Vec<Line> = if app.cover_lines.is_empty() {
-        vec![Line::from("Khong tim thay bia, nhan q de quay lai")]
+        vec![Line::from("未找到封面，按 q 返回")]
     } else {
         app.cover_lines.iter().cloned().map(Line::from).collect()
     };

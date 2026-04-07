@@ -17,7 +17,7 @@ pub(super) fn update_menu(config: &Config) -> Result<Option<String>> {
     let save_dir = config.default_save_dir();
     if !save_dir.exists() {
         println!(
-            "Không có truyện nào để cập nhật (thư mục lưu không tồn tại): {}\n",
+            "没有可供更新的小说（保存目录不存在）：{}\n",
             save_dir.display()
         );
         return Ok(None);
@@ -25,12 +25,12 @@ pub(super) fn update_menu(config: &Config) -> Result<Option<String>> {
 
     let (updates, no_updates) = scan_updates(config, &save_dir)?;
     if updates.is_empty() && no_updates.is_empty() {
-        println!("Không có truyện nào để cập nhật\n");
+        println!("没有可供更新的小说\n");
         return Ok(None);
     }
 
     loop {
-        println!("\n===== Danh sách truyện có thể cập nhật =====");
+        println!("\n===== 可供更新的小说列表 =====");
         for (idx, u) in updates.iter().enumerate() {
             println!("{}. {}", idx + 1, u.label);
         }
@@ -38,19 +38,19 @@ pub(super) fn update_menu(config: &Config) -> Result<Option<String>> {
             None
         } else {
             let n = updates.len() + 1;
-            println!("{}. Không có cập nhật ({})", n, no_updates.len());
+            println!("{}. 无更新 ({})", n, no_updates.len());
             Some(n)
         };
-        println!("q. Thoát\n");
+        println!("q. 退出\n");
 
-        let sel = super::read_line("Nhập số thứ tự: ")?;
+        let sel = super::read_line("请输入编号：")?;
         let sel = sel.trim().to_ascii_lowercase();
         if sel == "q" {
-            println!("Đã hủy cập nhật\n");
+            println!("已取消更新\n");
             return Ok(None);
         }
         let Ok(n) = sel.parse::<usize>() else {
-            println!("Lỗi: Hãy nhập số thứ tự hoặc q để thoát.\n");
+            println!("错误：请输入数字编号或 q 退出。\n");
             continue;
         };
 
@@ -60,7 +60,7 @@ pub(super) fn update_menu(config: &Config) -> Result<Option<String>> {
 
         if let Some(no_idx) = opt_no_update
             && n == no_idx
-            && let Some(book_id) = select_from_list(&no_updates, "Sach khong co cap nhat")?
+            && let Some(book_id) = select_from_list(&no_updates, "无更新的书籍")?
         {
             return Ok(Some(book_id));
         }
@@ -71,7 +71,7 @@ pub(super) fn update_menu(config: &Config) -> Result<Option<String>> {
         }
 
         let max = opt_no_update.unwrap_or(updates.len());
-        println!("Lỗi: Hãy nhập số từ 1 đến {} hoặc q để thoát.\n", max);
+        println!("错误：请输入 1 到 {} 之间的数字，或 q 退出。\n", max);
     }
 }
 
@@ -81,21 +81,21 @@ fn select_from_list(list: &[UpdateEntry], title: &str) -> Result<Option<String>>
         for (idx, u) in list.iter().enumerate() {
             println!("{}. {}", idx + 1, u.label);
         }
-        println!("q. Hủy và quay lại menu trước\n");
+        println!("q. 取消并返回上级菜单\n");
 
-        let sel = super::read_line("Nhập số thứ tự: ")?;
+        let sel = super::read_line("请输入编号：")?;
         let sel = sel.trim().to_ascii_lowercase();
         if sel == "q" {
             return Ok(None);
         }
         let Ok(n) = sel.parse::<usize>() else {
-            println!("Lỗi: Hãy nhập số thứ tự hoặc q để quay lại.\n");
+            println!("错误：请输入数字编号或 q 返回。\n");
             continue;
         };
         if n >= 1 && n <= list.len() {
             return Ok(Some(list[n - 1].book_id.clone()));
         }
-        println!("Lỗi: Hãy nhập số từ 1 đến {} hoặc q để quay lại.\n", list.len());
+        println!("错误：请输入 1 到 {} 之间的数字，或 q 返回。\n", list.len());
     }
 }
 
@@ -103,11 +103,11 @@ fn scan_updates(_config: &Config, save_dir: &Path) -> Result<(Vec<UpdateEntry>, 
     let scan = novel_updates::scan_novel_updates(save_dir)?;
 
     let to_entry = |it: novel_updates::NovelUpdateRow| {
-        let ignore_marker = if it.is_ignored { "[Đã bỏ qua] " } else { "" };
+        let ignore_marker = if it.is_ignored { "[已忽略] " } else { "" };
         UpdateEntry {
             book_id: it.book_id.clone(),
             label: format!(
-                "{}《{}》({}) — Chương mới: {}",
+                "{}《{}》({}) — 新章节：{}",
                 ignore_marker, it.book_name, it.book_id, it.new_count
             ),
         }

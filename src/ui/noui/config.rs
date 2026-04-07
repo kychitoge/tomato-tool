@@ -72,200 +72,200 @@ pub(super) fn show_config_menu(config: &mut Config) -> Result<()> {
     // 参照 old_main.py 的 option_defs 顺序
     const OPTS: &[ConfigOption] = &[
         ConfigOption {
-            name: "Duong dan luu",
+            name: "保存路径",
             field: ConfigField::SavePath,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "Dinh dang luu sach (txt/epub)",
+            name: "小说保存格式(txt/epub)",
             field: ConfigField::NovelFormat,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "Co luu sach theo dang file roi hay khong",
+            name: "是否以散装形式保存小说",
             field: ConfigField::BulkFiles,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Co tu dong don file cache hay khong",
+            name: "是否自动清理缓存文件",
             field: ConfigField::AutoClearDump,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Co cho phep ghi de file da ton tai hay khong",
+            name: "是否允许覆盖已存在的文件",
             field: ConfigField::AllowOverwriteFiles,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Truong uu tien ten sach",
+            name: "优先书名字段",
             field: ConfigField::PreferredBookNameField,
             ty: ConfigValueType::Selection,
         },
         ConfigOption {
-            name: "Co tao sach noi hay khong",
+            name: "是否生成有声小说",
             field: ConfigField::EnableAudiobook,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Giong doc sach noi",
+            name: "有声小说发音人",
             field: ConfigField::AudiobookVoice,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "Toc do doc sach noi (vd +0%)",
+            name: "有声小说语速(如+0%)",
             field: ConfigField::AudiobookRate,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "Am luong sach noi (vd +0%)",
+            name: "有声小说音量(如+0%)",
             field: ConfigField::AudiobookVolume,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "Cao do sach noi (vd +2Hz/-1st, co the de trong)",
+            name: "有声小说音调(如+2Hz/-1st, 可留空)",
             field: ConfigField::AudiobookPitch,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "So luong song song cho sach noi",
+            name: "有声小说并发数",
             field: ConfigField::AudiobookConcurrency,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Dinh dang sach noi (mp3/wav)",
+            name: "有声小说格式(mp3/wav)",
             field: ConfigField::AudiobookFormat,
             ty: ConfigValueType::String,
         },
         ConfigOption {
-            name: "So thread toi da",
+            name: "最大线程数",
             field: ConfigField::MaxWorkers,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Timeout request (giay)",
+            name: "请求超时(秒)",
             field: ConfigField::RequestTimeout,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "So lan thu lai toi da",
+            name: "最大重试次数",
             field: ConfigField::MaxRetries,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Thoi gian cho toi thieu (ms)",
+            name: "最小等待时间(ms)",
             field: ConfigField::MinWaitTime,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Thoi gian cho toi da (ms)",
+            name: "最大等待时间(ms)",
             field: ConfigField::MaxWaitTime,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Timeout ket noi toi thieu",
+            name: "最小连接超时时间",
             field: ConfigField::MinConnectTimeout,
             ty: ConfigValueType::Float,
         },
         ConfigOption {
-            name: "Co su dung API chinh thuc hay khong",
+            name: "是否使用官方API",
             field: ConfigField::UseOfficialApi,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Danh sach API tuy chinh (tach boi dau phay)",
+            name: "自定义API列表(逗号分隔)",
             field: ConfigField::ApiEndpoints,
             ty: ConfigValueType::List,
         },
         ConfigOption {
-            name: "Co tai binh luan doan hay khong",
+            name: "是否下载段评",
             field: ConfigField::EnableSegmentComments,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "So binh luan toi da moi doan",
+            name: "段评每段最多条数",
             field: ConfigField::SegmentCommentsTopN,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "So thread song song cho binh luan doan",
+            name: "段评并发线程数",
             field: ConfigField::SegmentCommentsWorkers,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Co tai anh trong phan binh luan hay khong",
+            name: "是否下载评论区图片",
             field: ConfigField::DownloadCommentImages,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Co tai avatar trong phan binh luan hay khong",
+            name: "是否下载评论区头像",
             field: ConfigField::DownloadCommentAvatars,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "So thread tai anh binh luan",
+            name: "评论图片下载线程数",
             field: ConfigField::MediaDownloadWorkers,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Blacklist domain anh (tach boi dau phay)",
+            name: "图片域名黑名单(逗号分隔)",
             field: ConfigField::BlockedMediaDomains,
             ty: ConfigValueType::List,
         },
         ConfigOption {
-            name: "Bat buoc chuyen tat ca anh sang JPEG",
+            name: "强制所有图片转JPEG",
             field: ConfigField::ForceConvertImagesToJpeg,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Thu chuyen sang JPEG voi anh khong phai JPEG",
+            name: "非JPEG尝试转JPEG",
             field: ConfigField::JpegRetryConvert,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Chat luong JPEG (0-100)",
+            name: "JPEG质量(0-100)",
             field: ConfigField::JpegQuality,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Chuyen HEIC sang JPEG",
+            name: "HEIC转JPEG",
             field: ConfigField::ConvertHeicToJpeg,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Giu lai file HEIC goc",
+            name: "保留原始HEIC文件",
             field: ConfigField::KeepHeicOriginal,
             ty: ConfigValueType::Bool,
         },
         ConfigOption {
-            name: "Gioi han so media moi chuong (0 = khong gioi han)",
+            name: "每章媒体数量上限(0为不限制)",
             field: ConfigField::MediaLimitPerChapter,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Gioi han canh dai nhat cua anh theo pixel (>0 moi co hieu luc)",
+            name: "图片最长边像素上限(>0生效)",
             field: ConfigField::MediaMaxDimensionPx,
             ty: ConfigValueType::Int,
         },
         ConfigOption {
-            name: "Thut le dong dau EPUB (em)",
+            name: "EPUB首行缩进(em)",
             field: ConfigField::FirstLineIndentEm,
             ty: ConfigValueType::Float,
         },
         ConfigOption {
-            name: "Co dung giao dien CLI cu hay khong (can khoi dong lai)",
+            name: "是否使用老版本命令行界面(需重启)",
             field: ConfigField::OldCli,
             ty: ConfigValueType::Bool,
         },
     ];
 
     loop {
-        println!("\n=== Tuy chon cau hinh ===");
+        println!("\n=== 配置选项 ===");
         for (idx, opt) in OPTS.iter().enumerate() {
             let mut name = opt.name.to_string();
             if matches!(opt.field, ConfigField::EnableSegmentComments)
                 && config.novel_format.eq_ignore_ascii_case("txt")
             {
-                name.push_str(" (TXT khong ho tro)");
+                name.push_str("（TXT 不支持）");
             }
             println!(
                 "{}. {}: {}",
@@ -274,19 +274,19 @@ pub(super) fn show_config_menu(config: &mut Config) -> Result<()> {
                 config_value_display(config, opt.field)
             );
         }
-        println!("0. Quay ve menu chinh");
+        println!("0. 返回主菜单");
 
-        let choice = super::read_line("\nHay chon so thu tu muc cau hinh can sua: ")?;
+        let choice = super::read_line("\n请选择要修改的配置项编号: ")?;
         let choice = choice.trim();
         if choice == "0" {
             break;
         }
         let Ok(idx) = choice.parse::<usize>() else {
-            println!("Vui long nhap so thu tu");
+            println!("请输入数字编号");
             continue;
         };
         if idx == 0 || idx > OPTS.len() {
-            println!("So thu tu vuot qua pham vi");
+            println!("编号超出范围");
             continue;
         }
         let opt = OPTS[idx - 1];
@@ -297,18 +297,18 @@ pub(super) fn show_config_menu(config: &mut Config) -> Result<()> {
             match show_selection_prompt(opt.field, &cur)? {
                 Some(v) => v,
                 None => {
-                    println!("Da huy chinh sua");
+                    println!("已取消修改");
                     continue;
                 }
             }
         } else {
             let input = super::read_line(&format!(
-                "Hien tai {} = {}\nNhap gia tri moi (de trong de huy): ",
+                "当前 {} = {}\n输入新值(留空取消): ",
                 opt.name, cur
             ))?;
             let trimmed = input.trim().to_string();
             if trimmed.is_empty() {
-                println!("Da huy chinh sua");
+                println!("已取消修改");
                 continue;
             }
             trimmed
@@ -320,7 +320,7 @@ pub(super) fn show_config_menu(config: &mut Config) -> Result<()> {
         write_with_comments(config, Path::new(<Config as ConfigSpec>::FILE_NAME))
             .map_err(|e| anyhow!(e.to_string()))?;
         println!(
-            "Da cap nhat {} = {}",
+            "已更新 {} = {}",
             opt.name,
             config_value_display(config, opt.field)
         );
@@ -385,13 +385,13 @@ fn apply_config_edit(config: &mut Config, opt: ConfigOption, text: &str) -> Resu
         ConfigValueType::Int => {
             let v: i64 = text
                 .parse()
-                .map_err(|_| anyhow!("Chuyen kieu that bai: can so nguyen"))?;
+                .map_err(|_| anyhow!("类型转换失败：需要整数"))?;
             set_int(config, opt.field, v)?;
         }
         ConfigValueType::Float => {
             let v: f64 = text
                 .parse()
-                .map_err(|_| anyhow!("Chuyen kieu that bai: can so thap phan"))?;
+                .map_err(|_| anyhow!("类型转换失败：需要小数"))?;
             set_float(config, opt.field, v)?;
         }
         ConfigValueType::String => {
@@ -423,7 +423,7 @@ fn set_bool(config: &mut Config, field: ConfigField, v: bool) -> Result<()> {
         ConfigField::EnableSegmentComments => {
             if v && config.novel_format.eq_ignore_ascii_case("txt") {
                 config.novel_format = "epub".to_string();
-                println!("Da tu dong doi dinh dang luu sang EPUB de bat tinh nang binh luan doan.");
+                println!("已自动将保存格式切换为 EPUB 以启用段评功能。");
             }
             config.enable_segment_comments = v;
         }
@@ -434,7 +434,7 @@ fn set_bool(config: &mut Config, field: ConfigField, v: bool) -> Result<()> {
         ConfigField::ConvertHeicToJpeg => config.convert_heic_to_jpeg = v,
         ConfigField::KeepHeicOriginal => config.keep_heic_original = v,
         ConfigField::OldCli => config.old_cli = v,
-        _ => return Err(anyhow!("Truong nay khong phai bool")),
+        _ => return Err(anyhow!("该字段不是 bool")),
     }
     Ok(())
 }
@@ -443,85 +443,85 @@ fn set_int(config: &mut Config, field: ConfigField, v: i64) -> Result<()> {
     match field {
         ConfigField::MaxWorkers => {
             if v <= 0 {
-                return Err(anyhow!("So thread toi da phai lon hon 0"));
+                return Err(anyhow!("最大线程数必须大于 0"));
             }
             config.max_workers = v as usize;
         }
         ConfigField::RequestTimeout => {
             if v <= 0 {
-                return Err(anyhow!("Timeout request phai lon hon 0"));
+                return Err(anyhow!("请求超时必须大于 0"));
             }
             config.request_timeout = v as u64;
         }
         ConfigField::MaxRetries => {
             if v < 0 {
-                return Err(anyhow!("So lan thu lai toi da khong duoc am"));
+                return Err(anyhow!("最大重试次数不能为负"));
             }
             config.max_retries = v as u32;
         }
         ConfigField::MinWaitTime => {
             if v < 0 {
-                return Err(anyhow!("Thoi gian cho toi thieu khong duoc am"));
+                return Err(anyhow!("最小等待时间不能为负"));
             }
             let v = v as u64;
             if v > config.max_wait_time {
-                return Err(anyhow!("Thoi gian cho toi thieu khong duoc vuot qua thoi gian cho toi da"));
+                return Err(anyhow!("最小等待时间不能超过最大等待时间"));
             }
             config.min_wait_time = v;
         }
         ConfigField::MaxWaitTime => {
             if v < 0 {
-                return Err(anyhow!("Thoi gian cho toi da khong duoc am"));
+                return Err(anyhow!("最大等待时间不能为负"));
             }
             let v = v as u64;
             if v < config.min_wait_time {
-                return Err(anyhow!("Thoi gian cho toi da khong duoc nho hon thoi gian cho toi thieu"));
+                return Err(anyhow!("最大等待时间不能小于最小等待时间"));
             }
             config.max_wait_time = v;
         }
         ConfigField::AudiobookConcurrency => {
             if v <= 0 {
-                return Err(anyhow!("Do song song cua sach noi phai lon hon 0"));
+                return Err(anyhow!("有声小说并发数必须大于 0"));
             }
             config.audiobook_concurrency = v as usize;
         }
         ConfigField::SegmentCommentsTopN => {
             if v <= 0 {
-                return Err(anyhow!("Gioi han so binh luan doan phai lon hon 0"));
+                return Err(anyhow!("段评条数上限必须大于 0"));
             }
             config.segment_comments_top_n = v as usize;
         }
         ConfigField::SegmentCommentsWorkers => {
             if v <= 0 {
-                return Err(anyhow!("So thread binh luan doan phai lon hon 0"));
+                return Err(anyhow!("段评线程数必须大于 0"));
             }
             config.segment_comments_workers = v as usize;
         }
         ConfigField::MediaDownloadWorkers => {
             if v <= 0 {
-                return Err(anyhow!("So thread media phai lon hon 0"));
+                return Err(anyhow!("媒体线程数必须大于 0"));
             }
             config.media_download_workers = v as usize;
         }
         ConfigField::JpegQuality => {
             if !(0..=100).contains(&v) {
-                return Err(anyhow!("Chat luong JPEG phai nam trong khoang 0-100"));
+                return Err(anyhow!("JPEG质量需在 0-100 之间"));
             }
             config.jpeg_quality = v as u8;
         }
         ConfigField::MediaLimitPerChapter => {
             if v < 0 {
-                return Err(anyhow!("Gioi han media moi chuong khong duoc am"));
+                return Err(anyhow!("每章媒体数量上限不能为负"));
             }
             config.media_limit_per_chapter = v as usize;
         }
         ConfigField::MediaMaxDimensionPx => {
             if v < 0 {
-                return Err(anyhow!("Gioi han canh dai nhat cua anh theo pixel khong duoc am"));
+                return Err(anyhow!("图片最长边像素上限不能为负"));
             }
             config.media_max_dimension_px = v as u32;
         }
-        _ => return Err(anyhow!("Truong nay khong phai int")),
+        _ => return Err(anyhow!("该字段不是 int")),
     }
     Ok(())
 }
@@ -530,17 +530,17 @@ fn set_float(config: &mut Config, field: ConfigField, v: f64) -> Result<()> {
     match field {
         ConfigField::MinConnectTimeout => {
             if v <= 0.0 {
-                return Err(anyhow!("Timeout ket noi toi thieu phai lon hon 0"));
+                return Err(anyhow!("最小连接超时时间必须大于 0"));
             }
             config.min_connect_timeout = v;
         }
         ConfigField::FirstLineIndentEm => {
             if v < 0.0 {
-                return Err(anyhow!("Do thut le khong duoc am"));
+                return Err(anyhow!("缩进不能为负"));
             }
             config.first_line_indent_em = v as f32;
         }
-        _ => return Err(anyhow!("Truong nay khong phai float")),
+        _ => return Err(anyhow!("该字段不是 float")),
     }
     Ok(())
 }
@@ -550,19 +550,19 @@ fn set_string(config: &mut Config, field: ConfigField, v: &str) -> Result<()> {
         ConfigField::SavePath => {
             let p = v.trim();
             if p.is_empty() {
-                return Err(anyhow!("Duong dan luu khong duoc de trong"));
+                return Err(anyhow!("保存路径不能为空"));
             }
-            fs::create_dir_all(p).with_context(|| format!("Tao thu muc that bai: {}", p))?;
+            fs::create_dir_all(p).with_context(|| format!("创建目录失败: {}", p))?;
             config.save_path = p.to_string();
         }
         ConfigField::NovelFormat => {
             let lower = v.trim().to_ascii_lowercase();
             if lower != "txt" && lower != "epub" {
-                return Err(anyhow!("Dinh dang luu chi ho tro txt/epub"));
+                return Err(anyhow!("保存格式仅支持 txt/epub"));
             }
             if lower == "txt" && config.enable_segment_comments {
                 config.enable_segment_comments = false;
-                println!("Da tu dong tat binh luan doan de tuong thich dinh dang TXT.");
+                println!("已自动关闭段评以兼容 TXT 格式。");
             }
             config.novel_format = lower;
         }
@@ -573,7 +573,7 @@ fn set_string(config: &mut Config, field: ConfigField, v: &str) -> Result<()> {
         ConfigField::AudiobookFormat => {
             let lower = v.trim().to_ascii_lowercase();
             if lower != "mp3" && lower != "wav" {
-                return Err(anyhow!("Dinh dang sach noi chi ho tro mp3/wav"));
+                return Err(anyhow!("有声小说格式仅支持 mp3/wav"));
             }
             config.audiobook_format = lower;
         }
@@ -592,13 +592,13 @@ fn set_string(config: &mut Config, field: ConfigField, v: &str) -> Result<()> {
                     lower
                 } else {
                     return Err(anyhow!(
-                        "Truong uu tien ten sach chi ho tro: Ten sach mac dinh, Ten sach goc, Ten sach ngan, Chon sau khi tai xong"
+                        "优先书名字段仅支持：默认书名、原始书名、短书名、下载完后选择"
                     ));
                 }
             };
             config.preferred_book_name_field = field_name;
         }
-        _ => return Err(anyhow!("Truong nay khong phai string")),
+        _ => return Err(anyhow!("该字段不是 string")),
     }
     Ok(())
 }
@@ -607,7 +607,7 @@ fn set_list(config: &mut Config, field: ConfigField, v: Vec<String>) -> Result<(
     match field {
         ConfigField::ApiEndpoints => config.api_endpoints = v,
         ConfigField::BlockedMediaDomains => config.blocked_media_domains = v,
-        _ => return Err(anyhow!("Truong nay khong phai list")),
+        _ => return Err(anyhow!("该字段不是 list")),
     }
     Ok(())
 }
@@ -615,21 +615,21 @@ fn set_list(config: &mut Config, field: ConfigField, v: Vec<String>) -> Result<(
 /// 将书名字段的英文名转换为中文显示名
 fn book_name_field_to_chinese(field: &str) -> &'static str {
     match field {
-        "book_name" => "Ten sach mac dinh",
-        "original_book_name" => "Ten sach goc",
-        "book_short_name" => "Ten sach ngan",
-        "ask_after_download" => "Chon sau khi tai xong",
-        _ => "Ten sach mac dinh",
+        "book_name" => "默认书名",
+        "original_book_name" => "原始书名",
+        "book_short_name" => "短书名",
+        "ask_after_download" => "下载完后选择",
+        _ => "默认书名",
     }
 }
 
 /// 将中文显示名转换为书名字段的英文名
 fn chinese_to_book_name_field(chinese: &str) -> Option<String> {
     match chinese {
-        "Ten sach mac dinh" => Some("book_name".to_string()),
-        "Ten sach goc" => Some("original_book_name".to_string()),
-        "Ten sach ngan" => Some("book_short_name".to_string()),
-        "Chon sau khi tai xong" => Some("ask_after_download".to_string()),
+        "默认书名" => Some("book_name".to_string()),
+        "原始书名" => Some("original_book_name".to_string()),
+        "短书名" => Some("book_short_name".to_string()),
+        "下载完后选择" => Some("ask_after_download".to_string()),
         _ => None,
     }
 }
@@ -639,27 +639,27 @@ fn show_selection_prompt(field: ConfigField, current: &str) -> Result<Option<Str
     match field {
         ConfigField::PreferredBookNameField => {
             const OPTIONS: &[(&str, &str)] = &[
-                ("Ten sach mac dinh", "book_name"),
-                ("Ten sach goc", "original_book_name"),
-                ("Ten sach ngan", "book_short_name"),
-                ("Chon sau khi tai xong", "ask_after_download"),
+                ("默认书名", "book_name"),
+                ("原始书名", "original_book_name"),
+                ("短书名", "book_short_name"),
+                ("下载完后选择", "ask_after_download"),
             ];
-            println!("\nHien tai: {}", current);
+            println!("\n当前: {}", current);
             for (idx, (label, _)) in OPTIONS.iter().enumerate() {
                 println!("  {}. {}", idx + 1, label);
             }
-            println!("  0. Huy");
-            let choice = super::read_line("Hay chon: ")?;
+            println!("  0. 取消");
+            let choice = super::read_line("请选择: ")?;
             let choice = choice.trim();
             if choice == "0" || choice.is_empty() {
                 return Ok(None);
             }
             let Ok(idx) = choice.parse::<usize>() else {
-                println!("Vui long nhap so thu tu");
+                println!("请输入数字编号");
                 return Ok(None);
             };
             if idx == 0 || idx > OPTIONS.len() {
-                println!("So thu tu vuot qua pham vi");
+                println!("编号超出范围");
                 return Ok(None);
             }
             Ok(Some(OPTIONS[idx - 1].0.to_string()))

@@ -18,14 +18,14 @@ pub(super) fn startup_check() {
     }
 
     println!(
-        "\nGợi ý: Phát hiện phiên bản mới {} (hiện tại {}). Nhập c để xem nhật ký cập nhật; nhập U để tự cập nhật (nếu có).\n",
+        "\n提示：检测到新版本 {}（当前 {}）。输入 c 查看更新日志；输入 U 执行自更新（若可用）。\n",
         report.latest.tag_name, report.current_tag
     );
 
     if let Some(body) = report.latest.body.as_deref() {
         let preview = preview_notes(body, 8, 800);
         if !preview.trim().is_empty() {
-            println!("Nhật ký cập nhật (trích đoạn):\n{}\n", preview);
+            println!("更新日志（节选）：\n{}\n", preview);
         }
     }
 }
@@ -33,14 +33,14 @@ pub(super) fn startup_check() {
 pub(super) fn check_update_menu() -> Result<()> {
     let report = app_update::check_update_report_blocking(env!("CARGO_PKG_VERSION"))?;
 
-    println!("\n===== Kiểm tra cập nhật chương trình =====");
-    println!("Phiên bản hiện tại: {}", report.current_tag);
-    println!("Phiên bản mới nhất: {}", report.latest.tag_name);
+    println!("\n===== 程序更新检查 =====");
+    println!("当前版本: {}", report.current_tag);
+    println!("最新版本: {}", report.latest.tag_name);
 
     if report.is_new_version {
-        println!("Trạng thái: Có phiên bản mới");
+        println!("状态: 有新版本");
     } else {
-        println!("Trạng thái: Đã là phiên bản mới nhất");
+        println!("状态: 已是最新版本");
     }
 
     if let Some(url) = report.latest.html_url.as_deref()
@@ -52,21 +52,21 @@ pub(super) fn check_update_menu() -> Result<()> {
     if let Some(body) = report.latest.body.as_deref() {
         let text = body.trim();
         if !text.is_empty() {
-            println!("\n----- Nhật ký cập nhật -----\n{}\n--------------------", text);
+            println!("\n----- 更新日志 -----\n{}\n--------------------", text);
         }
     }
 
     if report.is_new_version {
         let dismissed = app_update::dismissed_release_tag();
         if dismissed.as_deref() == Some(&report.latest.tag_name) {
-            println!("Gợi ý: Bạn đã đặt bỏ qua nhắc nhở cho bản này (vẫn có thể kiểm tra thủ công).");
+            println!("提示：你已设置忽略该版本提醒（仍可手动检查）。");
         }
 
-        let ans = super::read_line("Có đặt không nhắc lại cho bản này không? [y/N]: ")?;
+        let ans = super::read_line("是否对该版本设置不再提醒？[y/N]: ")?;
         let ans = ans.trim().to_ascii_lowercase();
         if ans == "y" || ans == "yes" {
             app_update::dismiss_release_tag(&report.latest.tag_name)?;
-            println!("Đã đặt: không nhắc lại {}\n", report.latest.tag_name);
+            println!("已设置：不再提醒 {}\n", report.latest.tag_name);
         }
     }
 

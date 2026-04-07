@@ -1,154 +1,147 @@
-# Tomato Novel Downloader bản Việt hoá
+# 番茄小说下载器~~精简版~~
 
-> Bản Việt hoá này được xây dựng từ repository gốc: [Tomato-Novel-Downloader](https://github.com/zhongbai2333/Tomato-Novel-Downloader)
+> 小小推广位：[RustEpubReader](https://github.com/zhongbai2333/RustEpubReader) <- 自研Epub阅读器，轻量快速  声明：阅读器项目不会添加下载器功能
 
-> Giữ nguyên tôn trọng bản quyền tác giả gốc. Đây là bản phục vụ sử dụng và đọc hiểu dễ hơn cho người dùng tiếng Việt.
+> 小小推广位：https://v.wjx.cn/vm/Qs13X5r.aspx#  <- 小问卷 若是有空帮我写一下 感激不尽（交差用的随便写）
 
-Tomato Novel Downloader là phiên bản tải truyện Fanqie/番茄小说 đã được tái cấu trúc bằng `Rust`, phát triển tiếp từ dự án gốc của tác giả [zhongbai2333](https://github.com/zhongbai2333).
+番茄小说下载器*不精简*版本，由于项目[fanqienovel-downloader](https://github.com/ying-ck/fanqienovel-downloader)一直不更新，于是我根据Dimily的项目Fork并重构
 
-So với các nhánh trước, dự án hiện đã được viết lại gần như toàn bộ bằng `Rust`, đồng thời bổ sung thêm các tính năng như: hỗ trợ tải EPUB, tiếp tục tải tốt hơn khi gián đoạn, quản lý lỗi tốt hơn, tìm kiếm sách, Web UI, và nhiều cải tiến vận hành khác.
+目前完全使用`Rust`重写了整个项目，与原Fork项目几乎没有关系了（~~虽说原本的Python版本也没几行是原项目的了~~）
 
-## Điểm cần biết
+我对其进行重构 + 优化，添加更多功能，包括：EPUB 下载支持、更好的断点续传、更好的错误管理、书本搜索、Web UI 等特性。
 
-- Bản này được Việt hoá để phục vụ trải nghiệm sử dụng.
-- Không chỉnh sửa thư mục `img/`.
-- Các file như `README.md`, `Dockerfile`, `Cargo.toml`, `build.rs`, `installer.sh` vẫn được giữ theo hướng English hoặc nội dung gốc khi cần thiết cho khả năng tương thích.
-- Mục tiêu chính là Việt hoá phần giao diện người dùng và thông báo sử dụng, không làm thay đổi logic nghiệp vụ không cần thiết.
+本项目支持两种构建模式：
 
-## Chế độ build
+- 默认模式（`official-api`）：保留 Official-API 能力（搜索/目录/段评等），同时也兼容第三方正文模式。
+- No-Official-API 模式（`no-official-api`）：**不依赖 Official-API crate**；目录/书信息走网页解析；**正文强制使用第三方 API 地址池**。
 
-Dự án hỗ trợ hai chế độ build:
+为了保证第三方API安全，部分第三方接口相关代码并不开源，包括地址和token，敬请谅解，谢谢！
 
-- Chế độ mặc định (`official-api`): giữ năng lực Official-API (tìm kiếm / mục lục / đoạn bình luận), đồng thời vẫn tương thích với chế độ nội dung từ bên thứ ba.
-- Chế độ `no-official-api`: **không phụ thuộc Official-API crate**; thông tin mục lục / sách đi qua phân tích web; **nội dung chính buộc dùng pool địa chỉ API bên thứ ba**.
+为方便视障人士使用，我保留了老的CLI界面，接下来是启用方法：
 
-Vì lý do an toàn cho API bên thứ ba, một phần mã liên quan đến interface nội bộ đó không được mở công khai, bao gồm địa chỉ và token. Mong bạn thông cảm.
+在第一次打开程序时 按三下 `o` 并回车 或者 按一下下方向键并按三下 `o` 都可以启用老版本CLI界面
 
-Để hỗ trợ người dùng cần giao diện cũ, dự án vẫn giữ lại CLI legacy. Cách bật:
-
-- Lần đầu mở chương trình, nhấn 3 lần `o` rồi Enter, hoặc nhấn một lần mũi tên xuống rồi nhấn 3 lần `o` để bật giao diện CLI cũ.
-- Khi chuyển thành công, chương trình sẽ phát ra âm thanh báo hiệu.
+注意：切换成功应该会发出 `灯` 的一声
 
 ---
 
-## Cách sử dụng
+## 我该如何使用？
 
-Tải file thực thi phù hợp với hệ điều hành của bạn từ trang [Releases](https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases) rồi chạy.
+根据自己的系统版本在[Releases](https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases)列表下载可执行文件，并运行
+首次下载新书请优先使用 TUI 或 Web UI；CLI 仅保留更新本地已有小说的能力
 
-Khi tải sách mới lần đầu, nên ưu tiên dùng TUI hoặc Web UI. CLI chỉ còn giữ khả năng cập nhật sách đã có sẵn trên máy.
+### 命令行模式（非交互）
 
-### Chế độ dòng lệnh (không tương tác)
+如果你需要在自动化脚本中使用下载器（例如为 Kindle 自动更新番茄小说），可以使用命令行参数更新**本地已经下载过**的书籍：
 
-Nếu bạn muốn dùng downloader trong script tự động, ví dụ để cập nhật truyện trên Kindle, có thể dùng tham số dòng lệnh để cập nhật các sách **đã tải về trước đó**:
-
-- Cập nhật một sách cụ thể:
+- 更新指定书籍：
 
     ```sh
     Tomato-Novel-Downloader.exe --update <book_id>
     ```
 
-    Ví dụ:
+    示例：
 
     ```sh
     Tomato-Novel-Downloader.exe --update 7318247498772674083
     ```
 
-Lưu ý:
+注意：
 
-- Chế độ dòng lệnh là chế độ không tương tác, sẽ bắt đầu cập nhật ngay, không cần nhập tay.
-- Sử dụng đường dẫn lưu mặc định và cấu hình tải trong file `config.yml`.
-- **CLI đã vô hiệu hoá khả năng `--download` để tạo tải mới**, nhằm giảm nguy cơ bị lạm dụng hàng loạt.
-- `--update` chỉ cho phép cập nhật các sách **đã tồn tại bản ghi tải về cục bộ** trong thư mục lưu mặc định.
-- Nếu sách chưa có bản ghi cục bộ, CLI sẽ từ chối chạy và yêu cầu dùng Web UI / TUI để tải lần đầu.
-- Chỉ chấp nhận `book_id`, không hỗ trợ tìm kiếm.
+- 命令行模式为非交互模式，会直接开始更新，无需手动输入
+- 使用配置文件（`config.yml`）中的默认保存路径和下载设置
+- **CLI 已禁用 `--download` 新建下载能力**，以降低脚本批量滥用风险
+- `--update` 只允许更新默认保存目录下**已经存在本地下载记录**的书籍
+- 如果书籍不存在本地记录，CLI 会拒绝执行，并提示改用 Web UI / TUI 完成首次下载
+- 只接受 book_id，不支持搜索功能
 
-### Giao diện CLI cũ
+### 老版 CLI（无 UI）说明
 
-- CLI cũ hiện đã **vô hiệu hoá tải mới / tìm kiếm để tải**.
-- Chỉ còn các khả năng: cập nhật sách đã có, xem lịch sử tải, chỉnh cấu hình, kiểm tra cập nhật chương trình.
-- Nếu cần tải sách mới lần đầu, hãy dùng TUI mặc định hoặc Web UI (`--server`).
+- 老版 CLI 现已**禁用新建下载/搜索下载**
+- 仅保留以下能力：更新本地已有小说、查看下载历史、修改配置、检查程序更新
+- 如果需要首次下载新书，请使用默认 TUI 或 Web UI（`--server`）
 
-### Chế độ Web UI (`--server`)
+### Web UI 服务器模式（--server）
 
-Nếu bạn muốn thao tác bằng trình duyệt trong mạng nội bộ (tìm kiếm, bắt đầu tải, xem tác vụ, tải file / đóng gói thư mục tải xuống), có thể bật Web UI:
+如果你希望在局域网用浏览器操作（搜索、发起下载、查看任务、下载文件/打包下载文件夹），可以启用 Web UI：
 
-- Khởi động Web UI:
+- 启动 Web UI：
 
     ```sh
     Tomato-Novel-Downloader.exe --server
     ```
 
-- Địa chỉ lắng nghe mặc định (`127.0.0.1:18423`):
+- 监听地址（默认 `127.0.0.1:18423`）：
 
-    Có thể đổi bằng biến môi trường, ví dụ để truy cập từ mạng LAN:
+    通过环境变量修改监听地址，例如局域网访问：
 
     ```sh
     TOMATO_WEB_ADDR=0.0.0.0:18423
     ```
 
-    Ví dụ lắng nghe IPv6 (lưu ý IPv6 cần đặt trong ngoặc vuông):
+    IPv6 监听示例（注意 IPv6 需要方括号）：
 
     ```sh
     TOMATO_WEB_ADDR=[::]:18423
     ```
 
-    Lắng nghe nhiều địa chỉ cùng lúc (phân tách bằng dấu phẩy hoặc chấm phẩy), ví dụ IPv4 + IPv6:
+    同时监听多个地址（用逗号或分号分隔），例如同时监听 IPv4 + IPv6：
 
     ```sh
     TOMATO_WEB_ADDR=0.0.0.0:18423,[::]:18423
     ```
 
-- Chế độ khoá bằng mật khẩu (ngăn người lạ sử dụng):
+- 密码锁模式（防止陌生人使用）：
 
     ```sh
-    Tomato-Novel-Downloader.exe --server --password mật_khẩu_của_bạn
+    Tomato-Novel-Downloader.exe --server --password 你的密码
     ```
 
-    Hoặc dùng biến môi trường:
+    或者使用环境变量：
 
     ```sh
-    TOMATO_WEB_PASSWORD=mật_khẩu_của_bạn
+    TOMATO_WEB_PASSWORD=你的密码
     ```
 
-- Thư mục dữ liệu (dùng cho Docker hoặc quản lý tập trung cấu hình / log):
+- 数据目录（用于 Docker 部署或集中管理配置/日志）：
 
-    Dùng tham số `--data-dir` để chỉ định thư mục dữ liệu; chương trình sẽ đặt `config.yml` và thư mục `logs` trong đó:
+    通过 `--data-dir` 参数指定数据目录，程序会将 `config.yml` 和 `logs` 文件夹放在该目录下：
 
     ```sh
     Tomato-Novel-Downloader.exe --server --data-dir /data
     ```
 
-    Ví dụ dùng Docker:
+    Docker 使用示例：
 
     ```sh
     docker run -v /host/data:/data my-tomato-image --server --data-dir /data
     ```
 
-    Cách này giúp mount dữ liệu dễ dàng, hỗ trợ lưu bền cấu hình và log.
+    这样可以方便地挂载数据目录，实现配置和日志的持久化。
 
-Các tính năng của Web UI (HTML thuần, không cần build frontend riêng):
+Web UI 提供的功能（纯 HTML，无需额外前端构建）：
 
-- Tìm sách và tạo tác vụ tải
-- Danh sách tác vụ / làm mới tiến độ / huỷ tác vụ
-- Duyệt thư viện tải theo thư mục, không còn flatten toàn bộ file
-- Tải file trực tiếp
-- Đóng gói cả thư mục thành file zip để tải xuống, giữ nguyên cấu trúc thư mục
-- Trang cấu hình: có thể chỉnh một số tuỳ chọn đầu ra và lưu ngược lại vào `config.yml`
+- 搜索书籍并创建下载任务
+- 任务列表/进度刷新/取消任务
+- 下载库按目录浏览（不再把所有文件递归平铺）
+- 文件直接下载
+- 文件夹一键打包为 zip 下载（保持目录结构，适配音频等“文件夹内包含文件夹”的情况）
+- 配置页面：可在线修改部分下载输出相关配置（会写回 `config.yml`）
 
-Lưu ý: Web UI chủ yếu phục vụ self-host / mạng nội bộ. Nếu muốn public ra Internet, nên đặt sau reverse proxy / HTTPS và bật khoá mật khẩu.
+注意：Web UI 主要面向自建/局域网使用；如果要暴露到公网，建议放在反向代理/HTTPS 后面，并务必开启密码锁。
 
 ---
 
-## Docker image
+## Docker 镜像
 
-Đã có sẵn image Docker cho Web UI:
+已提供 Web UI 版本的 Docker 镜像：
 
-- Địa chỉ image: [DockerHub](https://hub.docker.com/r/zhongbai233/tomato-novel-downloader-webui)
-- Ý nghĩa tag:
-  - `latest`: bản **glibc** mặc định, phù hợp server / desktop thông thường
-  - `latest-musl`: bản **musl**, phù hợp **router / NAS** hoặc hệ thống nhẹ
+- 镜像地址：[DockerHub](https://hub.docker.com/r/zhongbai233/tomato-novel-downloader-webui)
+- Tags 说明：
+  - `latest`：默认 **glibc** 版本（常规服务器/桌面环境）
+  - `latest-musl`：**musl** 版本，适用于 **软路由 / NAS** 等轻量系统
 
-Ví dụ chạy với glibc, map cổng và persist dữ liệu:
+示例（映射端口与持久化数据目录，使用 glibc 版本）：
 
 ```sh
 docker run -d \
@@ -156,11 +149,11 @@ docker run -d \
     -p 18423:18423 \
     -v /host/data:/data \
     -e TOMATO_WEB_ADDR=0.0.0.0:18423 \
-    -e TOMATO_WEB_PASSWORD=mật_khẩu_của_bạn \
+    -e TOMATO_WEB_PASSWORD=你的密码 \
     zhongbai233/tomato-novel-downloader-webui:latest --server --data-dir /data
 ```
 
-Nếu bạn dùng router hoặc NAS, hãy dùng bản musl:
+如果你使用软路由或 NAS 系统，请使用 musl 版本：
 
 ```sh
 docker run -d \
@@ -168,162 +161,164 @@ docker run -d \
     -p 18423:18423 \
     -v /host/data:/data \
     -e TOMATO_WEB_ADDR=0.0.0.0:18423 \
-    -e TOMATO_WEB_PASSWORD=mật_khẩu_của_bạn \
+    -e TOMATO_WEB_PASSWORD=你的密码 \
     zhongbai233/tomato-novel-downloader-webui:latest-musl --server --data-dir /data
 ```
 
-Bạn có thể dùng `TOMATO_WEB_ADDR`, `TOMATO_WEB_PASSWORD` và `--data-dir` để điều khiển địa chỉ lắng nghe, mật khẩu và thư mục dữ liệu.
+可通过 `TOMATO_WEB_ADDR`、`TOMATO_WEB_PASSWORD` 与 `--data-dir` 控制监听地址、密码与数据目录（见上文 Web UI 说明）。
 
 ---
 
-## Chế độ build (Cargo features)
+## 构建模式（Cargo Features）
 
-Project có hai feature loại trừ nhau: `official-api` và `no-official-api` (không thể bật cùng lúc).
+本项目提供两个互斥的 feature：`official-api` 与 `no-official-api`（两者不能同时启用）。
 
-### Chế độ mặc định: `official-api`
+### 默认模式：official-api（默认启用）
 
-- Build (mặc định đã bật):
+- 构建（默认就会启用）：
 
 ```sh
 cargo build --release
 ```
 
-- Hành vi:
-  - Tìm kiếm hoạt động được (TUI / Web UI / mục tìm kiếm của CLI cũ).
-  - Đoạn bình luận EPUB / thu thập tài nguyên hoạt động được, tuỳ theo cấu hình.
-  - Có thể chuyển giữa chế độ “official / third-party” khi lấy nội dung chính thông qua cấu hình (`use_official_api`).
+- 行为：
+  - 搜索功能可用（TUI / Web UI / 老 CLI 的搜索入口）。
+  - 段评（EPUB 段评页/资源抓取）可用（取决于配置项）。
+  - 正文获取可通过配置在“官方/第三方”之间切换（`use_official_api`）。
 
-### Chế độ `no-official-api` (Issue #187)
+### No-Official-API 模式：no-official-api（Issue #187）
 
-- Build:
+- 构建：
 
 ```sh
 cargo build --release --no-default-features --features no-official-api
 ```
 
-- Khác biệt chính:
-  - **Không phụ thuộc** crate `tomato-novel-official-api`, nên có thể build khi không có môi trường Official-API.
-  - Thông tin mục lục và sách: dùng phân tích web (`FanqieWebNetwork`).
-  - **Lấy nội dung chính: bắt buộc dùng chế độ bên thứ ba**.
-  - Tìm kiếm: không khả dụng.
-  - Đoạn bình luận: không khả dụng.
+- 行为差异（重点）：
+  - **不依赖** `tomato-novel-official-api` crate，可在缺少 Official-API 环境时编译。
+  - 目录与书本信息：使用网页解析（`FanqieWebNetwork`）。
+  - **正文获取：强制第三方模式**（忽略/不使用 `use_official_api=true` 的官方分支）。
+  - 搜索功能：不可用（会返回提示/报错）。
+  - 段评：不可用（会被强制关闭）。
 
 ---
 
-## Tạo sách nói bằng Edge TTS
+## Edge TTS 有声小说生成
 
-Từ phiên bản hiện tại, chương trình tích hợp [msedge-tts](https://github.com/hs-cn/msedge-tts) để tổng hợp giọng nói, cho phép tạo sách nói sau khi tải văn bản xong:
+从当前版本开始，程序内置了 [msedge-tts](https://github.com/hs-cn/msedge-tts) 语音合成功能，可在下载文本后自动生成对应的有声小说：
 
-- Trong menu cấu hình (dù là UI mới hay CLI cũ), bật `是否生成有声小说` để tự tạo file âm thanh sau mỗi lần tải hoàn tất.
-- Giọng mặc định là `zh-CN-XiaoxiaoNeural`, bạn có thể tuỳ chỉnh tốc độ đọc, âm lượng, cao độ và định dạng đầu ra (`mp3` hoặc `wav`). Giá trị cao độ nên dùng dạng có đơn vị như `+2Hz`, `-1st`; nếu để trống hoặc nhập 0 thì sẽ bỏ qua chỉnh cao độ.
-- Có thể chỉnh số lượng tác vụ đồng thời trong mục `有声小说并发数` (mặc định là 2). Khi tạo sẽ có thanh tiến trình; hãy chọn mức phù hợp với mạng và máy của bạn.
-- Âm thanh sẽ được lưu trong thư mục `{tên_sách}_audio` ở thư mục đầu ra, và đặt tên theo thứ tự chương, ví dụ `0001-第一章.mp3`.
-- `msedge-tts` cần gọi dịch vụ online của Microsoft, vì vậy môi trường chạy phải có thể truy cập Internet.
+- 在配置菜单（新 UI 或老 CLI 均可）中启用 `是否生成有声小说`，即可在每次下载完成后生成音频文件。
+- 默认发音人是 `zh-CN-XiaoxiaoNeural`，可以通过配置项自定义语速、音量、音调以及输出格式（`mp3` 或 `wav`）。音调值请使用 `+2Hz`、`-1st` 这类带单位的写法，若留空或填写 0 将忽略音调调整。
+- 可在“有声小说并发数”中调整 Edge TTS 并发任务数量（默认 2），生成时会显示进度条；请根据网络状况和机器性能选择适当的并发度。
+- 音频会存放在输出目录下的 `{书名}_audio` 文件夹中，并按章节顺序命名，例如 `0001-第一章.mp3`。
+- msedge-tts 需要联网调用微软的在线服务，请确保运行环境可正常访问外网。
 
-Nếu tạo thất bại, bạn có thể xem log để biết chi tiết lỗi.
+如遇到生成失败，可在日志中查看详细错误信息。
 
 ---
 
-## Câu hỏi thường gặp
+## 常见问题
 
-1. Trước đây đã có một downloader rồi, tại sao còn làm thêm cái khác?
+1. 之前就已经有了一个下载器，为什么还要再做一个？
 
-    ~~Mục tiêu ban đầu của chương trình là tối giản hoá mã nguồn của Tomato Novel Downloader để dễ vận hành, ổn định và nhanh hơn.~~
-    Sau khi tái cấu trúc, dự án hiện có kích thước lớn hơn bản gốc, không còn “nhẹ” như trước, nhưng đổi lại thao tác dễ dùng, ít cần cấu hình và chạy ngay.
+    ~~本程序的初衷就是极致简化番茄小说下载器的代码，使程序更加易于操作与运行，并且更加稳定和快速！~~
+    本程序由于重构导致文件体积较大，无法做到原项目的简易，但是此项目胜在傻瓜式操作，无需多余配置，立即使用
 
-2. Có chạy được trên điện thoại không?
+2. 手机端可以正常运行吗？
 
-    **Chỉ hỗ trợ thiết bị Android (Termux)**.
-    Tuy nhiên, vì **TUI/CLI không thân thiện với màn hình nhỏ**, nên trên điện thoại vẫn khuyến nghị dùng **Web UI (`--server`)**: khởi động dịch vụ trong Termux rồi thao tác bằng trình duyệt trên điện thoại (hoặc thiết bị khác trong cùng LAN).
+    **仅限安卓设备（Termux）**可以运行。
+    但由于 **TUI/CLI 界面对小屏幕不太友好**，手机端更推荐使用 **Web UI 模式（--server）**：在 Termux 里启动服务，然后用手机浏览器操作（或让同一局域网的其它设备访问）。
 
-    Trong release có sẵn bản build Android arm64: `TomatoNovelDownloader-Android_arm64-[số phiên bản hiện tại]`, có thể chạy trực tiếp trong Termux.
+    Release 里提供 Android arm64 构建产物：`TomatoNovelDownloader-Android_arm64-[当前版本号]`，可直接在 Termux 中运行。
 
-    Ngoài ra, nếu bạn muốn trong TUI dùng `Ctrl+V` để dán từ clipboard hệ thống, cần cài Termux API:
+    另外：如果你希望在 TUI 中使用 `Ctrl+V` 从系统剪贴板粘贴，需要安装 Termux API：
 
-    - Cài app: Termux:API
-    - Cài lệnh: `pkg install termux-api`
-    - Kiểm tra: `termux-clipboard-get` xuất ra nội dung bình thường
+    - 安装 App：Termux:API
+    - 安装命令：`pkg install termux-api`
+    - 验证：`termux-clipboard-get` 可正常输出内容
 
-    Để hỗ trợ người mới, bạn có thể cài bằng script:
+    为了防止有些零基础的小白下载到了此程序，我们为您准备了一些教程：
+
+    下载termux(链接:(<https://github.com/termux/termux-app/releases>) 并安装，然后运行部署脚本：
 
     ```sh
     bash <(curl -sL https://raw.githubusercontent.com/zhongbai2333/Tomato-Novel-Downloader/main/installer.sh)
     ```
 
-    Người dùng trong nước có thể dùng:
+    国内用户可使用：
 
     ```sh
     bash <(curl -sL https://dl.zhongbai233.com/installer.sh)
     ```
 
-    Sau khi cài xong, nên khởi động bằng Web UI (ví dụ):
+    安装完成后，推荐用 Web UI 启动（示例）：
 
     ```sh
-    TOMATO_WEB_ADDR=0.0.0.0:18423 TOMATO_WEB_PASSWORD=mật_khẩu_của_bạn tomato-novel-downloader --server
+    TOMATO_WEB_ADDR=0.0.0.0:18423 TOMATO_WEB_PASSWORD=你的密码 tomato-novel-downloader --server
     ```
 
-    Sau đó mở trình duyệt:
+    然后在浏览器打开：
 
-    - Máy hiện tại: `http://127.0.0.1:18423/`
-    - Thiết bị khác trong LAN: `http://<IP LAN của điện thoại>:18423/`
+    - 本机：`http://127.0.0.1:18423/`
+    - 局域网其它设备：`http://<手机的局域网IP>:18423/`
 
-3. Máy tính thì chạy thế nào?
+3. 电脑端该如何运行？
 
-    Trên `Windows`, chỉ cần nhấp đúp vào `TomatoNovelDownloader-Win64-[số phiên bản hiện tại].exe`
+    `Windows` 双击运行`TomatoNovelDownloader-Win64-[当前版本号].exe`
 
-    Trên `Linux` và `MacOS`, chạy bằng terminal. Bạn cũng có thể dùng script cài nhanh:
+    `Linux` 和 `MacOS` 使用终端运行，可以使用一键部署脚本：
 
     ```sh
     bash <(curl -sL https://raw.githubusercontent.com/zhongbai2333/Tomato-Novel-Downloader/main/installer.sh)
     ```
 
-    Người dùng trong nước có thể dùng:
+    国内用户可使用：
 
     ```sh
     bash <(curl -sL https://dl.zhongbai233.com/installer.sh)
     ```
 
-4. Book ID là gì? Lấy ở đâu?
+4. 小说id是什么？在哪里获取？
 
-    Có hai cách khuyên dùng:
+    推荐两种方式：
 
-    - Dùng trực tiếp chức năng “tìm sách” của Web UI, không cần tự tìm ID.
-    - Nếu bạn đã có link chia sẻ hoặc thông tin sách, thường sẽ có một dãy số rất dài (Book ID). Chỉ cần copy dãy đó.
+    - 直接使用 Web UI 的“搜索书籍”，不需要手动找 ID。
+    - 如果你已经有分享链接/书籍信息，通常会包含一段很长的数字（Book ID）。复制该数字即可。
 
-5. Tôi là người mới hoàn toàn, tải chương trình ở đâu?
+5. 我是纯小白，程序在哪里下载啊
 
-    Vào link [Releases](https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases), tìm bản mới nhất, mở phần `Assets`, rồi tải đúng file dành cho hệ điều hành của bạn.
+    直接点击此链接(<https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases>)先找到最新版本，然后在最新版本中找到”Assets”并点击来展开内容(如果已展开就不必进行此操作)。在展开的内容中找到对应程序，点击下载即可
 
-## Lưu ý quan trọng
+## 注意事项（必看）
 
-Vì chương trình phụ thuộc API, tương lai có thể có lúc API đột ngột ngừng hoạt động. Nếu gặp trường hợp đó, vui lòng báo ngay ở trang “Issues”.
+由于使用的是api，所以未来不知道有哪一天突然失效，如果真的出现了，请立即在“Issues”页面中回复！
 
-Nếu khi sử dụng gặp lỗi tải chương, chưa chắc là API hỏng. Có thể do lượng người dùng quá đông khiến API tạm ngưng hoặc sách bạn cần tải chưa được cập nhật trên API.
+如果您在使用本程序的时候出现了下载章节失败的情况，也许并不是api失效了，可能是因为调用api人数过多，导致api暂时关闭，如果遇到了这种情况，请稍后再试，另外，您需要下载的小说api可能会因没有更新所以下载失败。
 
-Đừng nghĩ rằng tăng số luồng sẽ tải nhanh hơn: việc đó chỉ làm tăng áp lực lên máy chủ.
+千万不要想着耍小聪明：“欸，我改一下线程数不就能快速下载了吗？”请打消这种念头！因为这样会加大服务器压力！！！
 
-Khi sử dụng, cũng không nên bật VPN hoặc proxy làm ảnh hưởng tới kết nối mạng.
+另外，在使用本程序时，请不要使用任何vpn或网络代理等一切影响网络正常使用的程序！
 
-Nếu vẫn gặp lỗi, hãy kiểm tra số lượng chương cần tải. Không khuyến nghị vượt quá 1500 chương.
+如果您也没有遇到以上的这种情况，请检查要下载的小说章节数量有多少，不建议大于1500章！(保守估计)
 
-> Nhấn mạnh: không được dùng chương trình này cho mục đích vi phạm pháp luật, ví dụ phát tán nội dung đã tải, chia sẻ cho người khác sử dụng sai mục đích, hoặc dùng API trái phép. Nội dung tải về chỉ nên phục vụ đọc cá nhân. Sau khi xem xong nên xoá file để tránh rủi ro bản quyền. Tác giả và cộng đồng đóng góp không chịu trách nhiệm cho mọi thiệt hại, tranh chấp pháp lý hoặc hậu quả phát sinh từ việc sử dụng chương trình.
+>划重点：切记！不能将此程序用于违法用途，例如将下载到的小说进行转载、给不良人员分享此程序使用等。本开发者严禁不支持这样做！！！并且请不要将api进行转载使用，除非您已经与开发者协商过，否则后果自负！下载到的小说仅供自行阅读，看完之后请立即删除文件，以免造成侵权，如果您还是偷尝禁果，需自行承担由此引发的任何法律责任和风险。程序的作者及项目贡献者不对因使用本程序所造成的任何损失、损害或法律后果负责！
 
-## Tuyên bố miễn trừ trách nhiệm
+## 免责声明
 
-  Chương trình này chỉ phục vụ mục đích học tập về Rust, kỹ thuật crawler mạng, xử lý dữ liệu web và các nghiên cứu liên quan. Vui lòng không sử dụng nó cho bất kỳ hoạt động nào vi phạm pháp luật hoặc xâm phạm quyền lợi của người khác.
+  本程序仅供 Rust 网络爬虫技术、网页数据处理及相关研究的学习用途。请勿将其用于任何违反法律法规或侵犯他人权益的活动。
   
-  Người dùng tự chịu mọi trách nhiệm pháp lý và rủi ro phát sinh từ việc sử dụng chương trình. Tác giả và cộng đồng đóng góp không chịu trách nhiệm cho bất kỳ tổn thất, thiệt hại hoặc hậu quả pháp lý nào.
+  使用本程序的用户需自行承担由此引发的任何法律责任和风险。程序的作者及项目贡献者不对因使用本程序所造成的任何损失、损害或法律后果负责。
   
-  Trước khi sử dụng, hãy chắc chắn rằng bạn tuân thủ các quy định pháp luật hiện hành và chính sách sử dụng của website mục tiêu. Nếu có bất kỳ thắc mắc hoặc lo ngại nào, hãy tham khảo ý kiến của luật sư chuyên môn.
+  在使用本程序之前，请确保您遵守适用的法律法规以及目标网站的使用政策。如有任何疑问或顾虑，请咨询专业法律顾问。
 
-## Lời cảm ơn
+## 感谢
 
-Cảm ơn bạn đã chọn sử dụng chương trình này. Nếu thấy hữu ích, bạn có thể để star. Nếu có góp ý, hãy gửi ở trang “Issues”. Sự ủng hộ của bạn là động lực lớn nhất để dự án tiếp tục được cập nhật.
+感谢用户选择此程序，如果喜欢可以加star，如果有什么对本程序的建议，请在“Issues”页面提出。您的喜欢就是我更新的最大动力❤️
 
-Giai đoạn đầu dự án · Cảm ơn dự án nền tảng ban đầu của tác giả Dimily
+项目前期 · 感谢原作者Dimily的基础项目
 
-Giai đoạn đầu dự án · Cảm ơn API từ GitHub user @helloplhm-qwq
+项目前期 · 感谢来自Github用户@helloplhm-qwq的api！
 
-Giai đoạn đầu dự án · Cảm ơn API từ QQ user @终忆
+项目前期 · 感谢来自QQ用户@终忆的api！
 
-Giai đoạn đầu dự án · Cảm ơn API từ GitHub user @jingluopro
+项目前期 · 感谢来自Github用户@jingluopro的api！！

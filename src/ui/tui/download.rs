@@ -17,10 +17,10 @@ use super::{App, Focus, PendingDownload, View, WorkerMsg, start_spinner};
 pub(super) fn request_cancel_download(app: &mut App) {
     if let Some(flag) = app.download_cancel_flag.as_ref() {
         flag.store(true, std::sync::atomic::Ordering::SeqCst);
-        app.status = "Đã yêu cầu dừng tải xuống…".to_string();
-        app.push_message("Đã gửi tín hiệu dừng, tác vụ hiện tại sẽ kết thúc sau");
+        app.status = "已请求停止下载…".to_string();
+        app.push_message("已发送停止信号，稍后结束当前任务");
     } else {
-        app.status = "Hiện không có tải xuống nào đang chạy".to_string();
+        app.status = "当前没有正在进行的下载".to_string();
     }
     app.stop_button_area = None;
 }
@@ -66,18 +66,18 @@ pub(super) fn start_download_task(
         .clone()
         .unwrap_or_else(|| book_id.clone());
 
-    app.status = format!("Bat dau tai: 《{}》 ({})", title, book_id);
-    info!(target: "ui", book_id = %book_id, "Bat dau tac vu tai");
+    app.status = format!("开始下载: 《{}》 ({})", title, book_id);
+    info!(target: "ui", book_id = %book_id, "启动下载任务");
     debug!(
         target: "ui",
         book_id = %book_id,
         save_path = %app.config.save_path,
         format = %app.config.novel_format,
         workers = app.config.max_workers,
-        "Tham so tai"
+        "下载参数"
     );
 
-    start_spinner(app, format!("Dang tai: {book_id}"));
+    start_spinner(app, format!("下载中: {book_id}"));
     let tx = app.worker_tx.clone();
     let progress_tx = app.worker_tx.clone();
     let cfg = app.config.clone();
@@ -105,11 +105,11 @@ pub(super) fn start_download_task(
         let format_asker = move |_manager: &crate::book_parser::book_manager::BookManager| {
             let options = vec![
                 downloader::BookNameOption {
-                    label: "Định dạng TXT".to_string(),
+                    label: "txt 格式".to_string(),
                     value: "txt".to_string(),
                 },
                 downloader::BookNameOption {
-                    label: "Định dạng EPUB".to_string(),
+                    label: "epub 格式".to_string(),
                     value: "epub".to_string(),
                 },
             ];
@@ -157,9 +157,9 @@ pub(super) fn apply_download_progress(app: &mut App, snap: ProgressSnapshot) {
 pub(super) fn apply_download_done(app: &mut App, book_id: String, result: Result<()>) {
     match result {
         Ok(()) => {
-            app.status = format!("Tải xuống hoàn tất: {book_id}");
-            app.push_message("Tải xuống hoàn tất");
-            info!(target: "ui", book_id = %book_id, "Tai xong");
+            app.status = format!("下载完成: {book_id}");
+            app.push_message("下载完成");
+            info!(target: "ui", book_id = %book_id, "下载完成");
             app.pending_download = None;
             app.preview_range.clear();
             app.preview_buttons.select(Some(0));
@@ -171,9 +171,9 @@ pub(super) fn apply_download_done(app: &mut App, book_id: String, result: Result
             app.stop_button_area = None;
         }
         Err(err) => {
-            app.status = format!("Tải xuống thất bại: {err}");
-            app.push_message(format!("Tải xuống thất bại: {err}"));
-            warn!(target: "ui", book_id = %book_id, "Tai that bai: {err}");
+            app.status = format!("下载失败: {err}");
+            app.push_message(format!("下载失败: {err}"));
+            warn!(target: "ui", book_id = %book_id, "下载失败: {err}");
             app.pending_download = None;
             app.preview_range.clear();
             app.preview_buttons.select(Some(0));

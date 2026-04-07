@@ -22,7 +22,7 @@ pub(super) fn handle_event_update(app: &mut App, event: Event) -> Result<()> {
                     ) {
                         Ok(m) => m,
                         Err(e) => {
-                            app.status = format!("Tải trạng thái sách thất bại: {}", e);
+                            app.status = format!("加载书籍状态失败: {}", e);
                             return Ok(());
                         }
                     };
@@ -34,9 +34,9 @@ pub(super) fn handle_event_update(app: &mut App, event: Event) -> Result<()> {
                     let new_state = manager.toggle_ignore_updates();
 
                     if new_state {
-                        app.status = format!("Đã thêm 《{}》 vào danh sách bỏ qua", entry.book_name);
+                        app.status = format!("已将《{}》添加到忽略列表", entry.book_name);
                     } else {
-                        app.status = format!("Đã xóa 《{}》 khỏi danh sách bỏ qua", entry.book_name);
+                        app.status = format!("已将《{}》从忽略列表移除", entry.book_name);
                     }
 
                     // 重新扫描更新
@@ -71,7 +71,7 @@ pub(super) fn handle_event_update(app: &mut App, event: Event) -> Result<()> {
             }
             KeyCode::Enter => {
                 if let Some(entry) = current_update_entry(app) {
-                    app.status = format!("Cập nhật: {}", entry.label);
+                    app.status = format!("更新: {}", entry.label);
                     let hint = BookMeta {
                         book_name: Some(entry.book_name.clone()),
                         ..BookMeta::default()
@@ -90,7 +90,7 @@ pub(super) fn handle_event_update(app: &mut App, event: Event) -> Result<()> {
 
 fn exit_update_view(app: &mut App) -> Result<()> {
     app.view = View::Home;
-    app.status = "Quay lại trang chính".to_string();
+    app.status = "返回主菜单".to_string();
     Ok(())
 }
 
@@ -224,17 +224,17 @@ fn current_update_entry(app: &App) -> Option<UpdateEntry> {
 }
 
 pub(super) fn show_update_menu(app: &mut App) -> Result<()> {
-    app.status = "Đang quét truyện cục bộ…".to_string();
+    app.status = "扫描本地小说…".to_string();
     app.update_entries.clear();
     app.update_no_updates.clear();
     app.update_state.select(None);
     app.show_no_update = false;
     app.view = View::Update;
-    super::start_spinner(app, "Đang quét truyện cục bộ…");
+    super::start_spinner(app, "扫描本地小说…");
 
     let cfg = app.config.clone();
     let tx = app.worker_tx.clone();
-    info!(target: "ui", "Bắt đầu quét cập nhật");
+    info!(target: "ui", "启动更新扫描");
     thread::spawn(move || {
         let result = scan_updates(&cfg);
         let _ = tx.send(WorkerMsg::UpdateScanned(result));
@@ -247,25 +247,25 @@ fn scan_updates(config: &Config) -> Result<(Vec<UpdateEntry>, Vec<UpdateEntry>)>
     let scan = novel_updates::scan_novel_updates(&save_dir)?;
 
     let to_entry = |it: novel_updates::NovelUpdateRow| {
-        let ignore_marker = if it.is_ignored { "[Da bo qua] " } else { "" };
+        let ignore_marker = if it.is_ignored { "[已忽略] " } else { "" };
         let label = if it.new_count > 0 && it.local_failed > 0 {
             format!(
-                "{}《{}》({}) — Chương mới: {} | Chương lỗi: {}",
+                "{}《{}》({}) — 新章节: {} | 失败章节: {}",
                 ignore_marker, it.book_name, it.book_id, it.new_count, it.local_failed
             )
         } else if it.new_count > 0 {
             format!(
-                "{}《{}》({}) — Chương mới: {}",
+                "{}《{}》({}) — 新章节: {}",
                 ignore_marker, it.book_name, it.book_id, it.new_count
             )
         } else if it.local_failed > 0 {
             format!(
-                "{}《{}》({}) — Chương lỗi: {}",
+                "{}《{}》({}) — 失败章节: {}",
                 ignore_marker, it.book_name, it.book_id, it.local_failed
             )
         } else {
             format!(
-                "{}《{}》({}) — Chương mới: 0",
+                "{}《{}》({}) — 新章节: 0",
                 ignore_marker, it.book_name, it.book_id
             )
         };
@@ -304,15 +304,15 @@ pub(super) fn draw_update(frame: &mut ratatui::Frame, app: &mut App) {
 
     let header_line = Line::from(vec![
         Span::styled(
-            "Có cập nhật",
+            "更新",
             Style::default()
                 .fg(Color::Green)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::raw("  |  lên/xuống để chọn, Enter để tải, i để bỏ qua/bỏ bỏ qua, n để chuyển sang mục không cập nhật, b hoặc nút góc phải dưới để quay lại"),
+        Span::raw("  |  上下选择，Enter 下载，i 忽略/取消忽略，n 切换无更新，b 或右下角返回"),
     ]);
     let header =
-        Paragraph::new(header_line).block(Block::default().borders(Borders::ALL).title("Kiểm tra cập nhật"));
+        Paragraph::new(header_line).block(Block::default().borders(Borders::ALL).title("更新检测"));
     frame.render_widget(header, layout[0]);
 
     let list = if app.show_no_update {
@@ -321,16 +321,16 @@ pub(super) fn draw_update(frame: &mut ratatui::Frame, app: &mut App) {
         &app.update_entries
     };
     let items: Vec<ListItem> = if list.is_empty() {
-        vec![ListItem::new("Không có mục để hiển thị")]
+        vec![ListItem::new("没有可展示的项目")]
     } else {
         list.iter()
             .map(|u| ListItem::new(u.label.clone()))
             .collect()
     };
     let list_title = if app.show_no_update {
-        "Sách không có cập nhật"
+        "无更新书籍"
     } else {
-        "Sách có cập nhật"
+        "有更新书籍"
     };
     let list_block = Block::default().borders(Borders::ALL).title(list_title);
     frame.render_widget(list_block.clone(), layout[1]);
@@ -380,13 +380,13 @@ pub(super) fn draw_update(frame: &mut ratatui::Frame, app: &mut App) {
     let mut msg_lines = vec![Line::from(app.status.clone())];
     if !app.update_entries.is_empty() {
         msg_lines.push(Line::from(format!(
-            "Có cập nhật: {} truyện",
+            "有更新: {} 本",
             app.update_entries.len()
         )));
     }
     if !app.update_no_updates.is_empty() {
         msg_lines.push(Line::from(format!(
-            "Không có cập nhật: {} truyện (nhấn n để xem)",
+            "无更新: {} 本 (按 n 查看)",
             app.update_no_updates.len()
         )));
     }
@@ -398,15 +398,15 @@ pub(super) fn draw_update(frame: &mut ratatui::Frame, app: &mut App) {
 
     let footer = Paragraph::new(msg_lines)
         .wrap(Wrap { trim: true })
-        .block(Block::default().borders(Borders::ALL).title("Gợi ý"));
+        .block(Block::default().borders(Borders::ALL).title("提示"));
     frame.render_widget(footer, footer_layout[0]);
 
-    let exit_btn = Paragraph::new(Line::from("Quay lại trang chính"))
+    let exit_btn = Paragraph::new(Line::from("返回主菜单"))
         .alignment(ratatui::layout::Alignment::Center)
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title("Quay lại")
+                .title("返回")
                 .style(Style::default().fg(Color::Yellow)),
         );
     frame.render_widget(exit_btn, footer_layout[1]);

@@ -135,11 +135,11 @@ pub(crate) async fn create_job(
         let format_asker = move |_manager: &crate::book_parser::book_manager::BookManager| {
             let options = vec![
                 dl::BookNameOption {
-                    label: "Định dạng txt".to_string(),
+                    label: "txt 格式".to_string(),
                     value: "txt".to_string(),
                 },
                 dl::BookNameOption {
-                    label: "Định dạng epub".to_string(),
+                    label: "epub 格式".to_string(),
                     value: "epub".to_string(),
                 },
             ];
