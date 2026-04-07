@@ -11,7 +11,7 @@ use crate::base_system::i18n;
 #[cfg(feature = "official-api")]
 pub(crate) fn free_notice_html(lang: &str) -> String {
     format!(
-        r#"<div class="free-notice">{} &middot; <a href="https://github.com/zhongbai2333/Tomato-Novel-Downloader" target="_blank" rel="noopener">开源仓库</a><br />{}</div>"#,
+        r#"<div class="free-notice">{} &middot; <a href="https://github.com/kychitoge/tomato-tool" target="_blank" rel="noopener">开源仓库</a><br />{}</div>"#,
         i18n::tr(lang, "web.free_text"),
         i18n::tr(lang, "web.free_warn")
     )
@@ -26,7 +26,7 @@ pub(crate) fn free_notice_html(_lang: &str) -> String {
 #[cfg(feature = "official-api")]
 pub(crate) fn free_notice_mobile_html(lang: &str) -> String {
     format!(
-        r#"<div class="free-notice free-notice-mobile">{} &middot; <a href="https://github.com/zhongbai2333/Tomato-Novel-Downloader" target="_blank" rel="noopener">开源仓库</a><br />{}</div>"#,
+        r#"<div class="free-notice free-notice-mobile">{} &middot; <a href="https://github.com/kychitoge/tomato-tool" target="_blank" rel="noopener">开源仓库</a><br />{}</div>"#,
         i18n::tr(lang, "web.free_text"),
         i18n::tr(lang, "web.free_warn")
     )

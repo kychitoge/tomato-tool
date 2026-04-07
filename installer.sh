@@ -6,7 +6,7 @@
 #   2. 询问用户安装路径（默认脚本执行路径；Termux 下默认 $HOME）
 #   3. 支持 2 种下载方式：
 #        (1) 直连 GitHub
-#        (2) 项目加速源（https://dl.zhongbai233.com/）加速
+#        (2) 自定义加速源（通过环境变量 TND_ACCEL_BASE 指定）
 #   4. Termux 环境下生成 run.sh（默认 --server）
 #   5. Linux / macOS (arm64 & Intel x86_64) 下下载对应架构二进制并赋予执行权限
 # 
@@ -27,6 +27,7 @@ set -e
 #   1. 自动通过 GitHub API 获取 Tomato-Novel-Downloader 最新版本
 #   2. 询问用户安装路径（Termux 下默认 $HOME）
 #   3. 支持 2 种下载方式：直连 / 项目加速源
+#      注：加速源可通过环境变量 TND_ACCEL_BASE 指定
 #   4. Termux 环境下生成 run.sh（默认 --server）
 #   5. Linux / macOS 下载对应架构二进制并赋予执行权限
 
@@ -106,7 +107,7 @@ fi
 
 echo ""
 log_info "正在从 GitHub API 获取最新版本信息..."
-GITHUB_API_URL="https://api.github.com/repos/zhongbai2333/Tomato-Novel-Downloader/releases/latest"
+GITHUB_API_URL="https://api.github.com/repos/kychitoge/tomato-tool/releases/latest"
 if command_exists curl; then
     TAG_NAME=$(curl -s "${GITHUB_API_URL}" | grep -m1 '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 elif command_exists wget; then
@@ -127,7 +128,7 @@ log_info "最新版本：${TAG_NAME}（VERSION=${VERSION}）"
 echo ""
 echo "请选择下载方式（输入序号，默认 1）："
 echo "  1) 直连 GitHub"
-echo "  2) 使用项目加速源 (https://dl.zhongbai233.com/) 加速"
+echo "  2) 使用自定义加速源（通过环境变量 TND_ACCEL_BASE 指定）"
 read -r ACCEL_CHOICE
 ACCEL_CHOICE="${ACCEL_CHOICE:-1}"
 case "$ACCEL_CHOICE" in
@@ -189,11 +190,18 @@ case "$PLATFORM" in
         ;;
 esac
 
-ORIGINAL_URL="https://github.com/zhongbai2333/Tomato-Novel-Downloader/releases/download/${TAG_NAME}/${BINARY_NAME}"
+ORIGINAL_URL="https://github.com/kychitoge/tomato-tool/releases/download/${TAG_NAME}/${BINARY_NAME}"
 DOWNLOAD_URL="$ORIGINAL_URL"
 case "$ACCEL_METHOD" in
     direct) ;;
-    accel) DOWNLOAD_URL="https://dl.zhongbai233.com/release/${TAG_NAME}/${BINARY_NAME}" ;;
+    accel)
+        if [ -n "${TND_ACCEL_BASE}" ]; then
+            DOWNLOAD_URL="${TND_ACCEL_BASE%/}/release/${TAG_NAME}/${BINARY_NAME}"
+        else
+            log_warn "未设置 TND_ACCEL_BASE，回退到直连 GitHub。"
+            DOWNLOAD_URL="$ORIGINAL_URL"
+        fi
+        ;;
 esac
 
 echo ""

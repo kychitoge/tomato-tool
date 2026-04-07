@@ -44,7 +44,7 @@ pub fn run(config: &mut Config) -> Result<()> {
 
     println!(
         "欢迎使用番茄小说下载器! v{}\n\
-{}: https://github.com/zhongbai2333/Tomato-Novel-Downloader \n\
+{}: https://github.com/kychitoge/tomato-tool \n\
 {}: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
 {}: zhongbai233 (https://github.com/zhongbai2333) \n\
 {}: Dlmily (https://github.com/Dlmily) \n\
@@ -62,7 +62,7 @@ pub fn run(config: &mut Config) -> Result<()> {
     #[cfg(feature = "official-api")]
     println!(
                 "\n{} {}\n\
-      官方仓库: https://github.com/zhongbai2333/Tomato-Novel-Downloader"
+            官方仓库: https://github.com/kychitoge/tomato-tool"
                 ,
                 i18n::tr(&config.ui_language, "noui.free_title"),
                 i18n::tr(&config.ui_language, "noui.free_text")

@@ -106,7 +106,7 @@ pub(super) fn draw_about(frame: &mut ratatui::Frame, app: &mut App) {
 
     let mut text = String::new();
     text.push_str(&format!(
-        "{}: https://github.com/zhongbai2333/Tomato-Novel-Downloader\n",
+        "{}: https://github.com/kychitoge/tomato-tool\n",
         i18n::tr(&app.config.ui_language, "about.project")
     ));
     text.push_str(&format!(
@@ -125,7 +125,7 @@ pub(super) fn draw_about(frame: &mut ratatui::Frame, app: &mut App) {
         text.push_str("\n===== 免费声明 =====\n");
         text.push_str(
             &format!(
-                "{}，官方仓库: https://github.com/zhongbai2333/Tomato-Novel-Downloader\n",
+                "{}，官方仓库: https://github.com/kychitoge/tomato-tool\n",
                 i18n::tr(&app.config.ui_language, "about.free_text")
             ),
         );
@@ -297,7 +297,7 @@ fn handle_mouse_about(app: &mut App, me: event::MouseEvent) -> Result<()> {
 }
 
 fn open_github_repo(app: &mut App) -> Result<()> {
-    let url = "https://github.com/zhongbai2333/Tomato-Novel-Downloader";
+    let url = "https://github.com/kychitoge/tomato-tool";
     let spawn_result = if cfg!(target_os = "windows") {
         // Avoid spawning `cmd.exe` (it can mutate console modes and break mouse events).
         // `explorer.exe` uses the default URL handler without touching our console settings.

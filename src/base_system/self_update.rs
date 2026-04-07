@@ -3,7 +3,7 @@
 //! 这是对历史 Python `update.py` 的 Rust 侧移植：
 //! - 通过 GitHub Releases API 获取最新版本
 //! - 选择匹配当前平台/架构的资产
-//! - 可选使用 `https://dl.zhongbai233.com/` 加速（可通过 `TND_DISABLE_ACCEL=1` 禁用）
+//! - 可选使用加速下载（通过 `TND_ACCEL_BASE` 指定；默认不启用；也可用 `TND_DISABLE_ACCEL=1` 禁用）
 //! - 下载后按需校验 SHA256（若 Release 资产提供 digest）
 //! - Windows 使用临时 .bat 进行替换并重启；Unix 直接替换并重启
 
@@ -24,8 +24,8 @@ use sha2::{Digest, Sha256};
 use tempfile::TempDir;
 use tracing::{info, warn};
 
-const OWNER: &str = "zhongbai2333";
-const REPO: &str = "Tomato-Novel-Downloader";
+const OWNER: &str = "kychitoge";
+const REPO: &str = "tomato-tool";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SelfUpdateOutcome {
@@ -234,7 +234,7 @@ fn fetch_latest_release(client: &Client) -> Result<ReleaseInfo> {
     let resp = client
         .get(url)
         .header(ACCEPT, "application/vnd.github+json")
-        .header(USER_AGENT, "Tomato-Novel-Downloader/1.0")
+        .header(USER_AGENT, "tomato-tool/1.0")
         .send()
         .context("request latest release")?
         .error_for_status()
@@ -295,10 +295,20 @@ fn get_latest_release_asset() -> Result<MatchedReleaseAsset> {
         if asset.name.contains(&platform_key) {
             let original_url = asset.browser_download_url;
             let accel_disabled = std::env::var("TND_DISABLE_ACCEL").ok().as_deref() == Some("1");
-            let download_url = if accel_disabled {
-                original_url.clone()
+            let accel_base = std::env::var("TND_ACCEL_BASE")
+                .ok()
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty());
+
+            // 默认不启用加速：避免把用户导向上游的第三方下载域名。
+            let download_url = if !accel_disabled {
+                if let Some(base) = accel_base.as_deref() {
+                    get_accelerated_url(&original_url, base)
+                } else {
+                    original_url.clone()
+                }
             } else {
-                get_accelerated_url(&original_url)
+                original_url.clone()
             };
 
             let sha256 = asset
@@ -323,13 +333,14 @@ fn get_latest_release_asset() -> Result<MatchedReleaseAsset> {
     ))
 }
 
-fn get_accelerated_url(original_url: &str) -> String {
-    // 使用项目自建 Cloudflare 加速：
-    // https://dl.zhongbai233.com/release/<tag>/<asset>
+fn get_accelerated_url(original_url: &str, accel_base: &str) -> String {
+    // 使用可配置的加速域名：
+    // {TND_ACCEL_BASE}/release/<tag>/<asset>
     // 原始链接格式：
     // https://github.com/<owner>/<repo>/releases/download/<tag>/<asset>
     if let Some(tail) = original_url.split("/releases/download/").nth(1) {
-        let url = format!("https://dl.zhongbai233.com/release/{tail}");
+        let base = accel_base.trim_end_matches('/');
+        let url = format!("{base}/release/{tail}");
         info!(target: "self_update", "使用加速下载地址: {url}");
         url
     } else {

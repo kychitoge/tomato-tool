@@ -15,8 +15,8 @@ use reqwest::header::{ACCEPT, USER_AGENT};
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 
-const OWNER: &str = "zhongbai2333";
-const REPO: &str = "Tomato-Novel-Downloader";
+const OWNER: &str = "kychitoge";
+const REPO: &str = "tomato-tool";
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct LatestRelease {
@@ -136,7 +136,7 @@ fn fetch_latest_release_blocking(client: &reqwest::blocking::Client) -> Result<R
     let resp = client
         .get(github_latest_release_url())
         .header(ACCEPT, "application/vnd.github+json")
-        .header(USER_AGENT, "Tomato-Novel-Downloader/1.0")
+        .header(USER_AGENT, "tomato-tool/1.0")
         .send()
         .context("request latest release")?
         .error_for_status()
