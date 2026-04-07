@@ -58,7 +58,11 @@ pub(super) fn handle_event_home(app: &mut App, event: Event) -> Result<()> {
                 app.list_state.select(None);
                 if app.pending_download.is_some() {
                     app.pending_download = None;
-                    app.status = "已取消待下载的预览".to_string();
+                    app.status = crate::base_system::i18n::tr(
+                        &app.config.ui_language,
+                        "tui.status.preview_cancelled",
+                    )
+                    .to_string();
                 }
             }
             KeyCode::Tab => cycle_focus(app),
@@ -75,23 +79,40 @@ pub(super) fn handle_event_home(app: &mut App, event: Event) -> Result<()> {
                         Ok(None) => {
                             #[cfg(target_os = "android")]
                             {
-                                app.status = "Android 剪贴板未就绪：需要 Termux + termux-api（termux-clipboard-get）".to_string();
+                                app.status = crate::base_system::i18n::tr(
+                                    &app.config.ui_language,
+                                    "tui.status.clipboard.android_not_ready",
+                                )
+                                .to_string();
                             }
                             #[cfg(not(target_os = "android"))]
                             {
-                                app.status = "当前构建未包含剪贴板后端（启用 clipboard-arboard）"
-                                    .to_string();
+                                app.status = crate::base_system::i18n::tr(
+                                    &app.config.ui_language,
+                                    "tui.status.clipboard.backend_missing",
+                                )
+                                .to_string();
                             }
                         }
                         Err(e) => {
-                            app.status = format!("读取剪贴板失败：{e}");
+                            app.status = format!(
+                                "{}: {e}",
+                                crate::base_system::i18n::tr(
+                                    &app.config.ui_language,
+                                    "tui.status.clipboard.read_failed_prefix",
+                                )
+                            );
                         }
                     }
                 }
 
                 #[cfg(not(feature = "clipboard"))]
                 {
-                    app.status = "当前构建未启用剪贴板支持".to_string();
+                    app.status = crate::base_system::i18n::tr(
+                        &app.config.ui_language,
+                        "tui.status.clipboard.disabled",
+                    )
+                    .to_string();
                 }
             }
             KeyCode::Char('p') => {
@@ -161,7 +182,7 @@ pub(super) fn handle_mouse_home(app: &mut App, me: event::MouseEvent) -> Result<
                         app.menu_state.select(Some(prev));
                     } else {
                         let sel = app.menu_state.selected().unwrap_or(0);
-                        let next = (sel + 1).min(MENU_ITEMS.len().saturating_sub(1));
+                        let next = (sel + 1).min(MENU_ACTIONS.len().saturating_sub(1));
                         app.menu_state.select(Some(next));
                     }
                     app.focus = Focus::Menu;
@@ -191,7 +212,7 @@ pub(super) fn handle_mouse_home(app: &mut App, me: event::MouseEvent) -> Result<
                         menu_area,
                         me.row,
                         &app.menu_state,
-                        MENU_ITEMS.len(),
+                        MENU_ACTIONS.len(),
                     ) {
                         app.menu_state.select(Some(idx));
                         super::trigger_menu_action(app)?;
@@ -224,7 +245,7 @@ pub(super) fn handle_mouse_home(app: &mut App, me: event::MouseEvent) -> Result<
                         menu_area,
                         me.row,
                         &app.menu_state,
-                        MENU_ITEMS.len(),
+                        MENU_ACTIONS.len(),
                     ) {
                         app.menu_state.select(Some(idx));
                         app.focus = Focus::Menu;
@@ -271,7 +292,7 @@ fn cycle_focus(app: &mut App) {
 }
 
 fn select_next_menu(app: &mut App) {
-    let len = MENU_ITEMS.len();
+    let len = MENU_ACTIONS.len();
     if len == 0 {
         return;
     }
@@ -284,7 +305,7 @@ fn select_next_menu(app: &mut App) {
 }
 
 fn select_prev_menu(app: &mut App) {
-    let len = MENU_ITEMS.len();
+    let len = MENU_ACTIONS.len();
     if len == 0 {
         return;
     }
@@ -303,7 +324,10 @@ pub(super) fn process_input(app: &mut App) -> Result<()> {
         app.config.old_cli = true;
         let path = Path::new(<Config as ConfigSpec>::FILE_NAME);
         if let Err(err) = write_with_comments(&app.config, path) {
-            app.status = format!("切换失败: {err}");
+            app.status = format!(
+                "{}: {err}",
+                crate::base_system::i18n::tr(&app.config.ui_language, "tui.status.switch_failed_prefix")
+            );
             return Ok(());
         }
 
@@ -311,7 +335,8 @@ pub(super) fn process_input(app: &mut App) -> Result<()> {
         let _ = out.write_all(b"\x07");
         let _ = out.flush();
 
-        app.status = "已切换到旧版CLI(读屏友好)，请手动重启程序。".to_string();
+        app.status = crate::base_system::i18n::tr(&app.config.ui_language, "tui.status.old_cli_switched")
+            .to_string();
         app.input.clear();
         app.should_quit = true;
         return Ok(());
@@ -324,27 +349,42 @@ pub(super) fn process_input(app: &mut App) -> Result<()> {
                 app.input.clear();
             }
             Err(err) => {
-                app.status = format!("范围无效: {}", err);
+                app.status = format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(&app.config.ui_language, "tui.status.range_invalid_prefix"),
+                    err
+                );
             }
         }
         return Ok(());
     }
 
     if text.is_empty() {
-        app.status = String::from("请输入书名、链接或 book_id，按 Enter 开始。");
+        app.status = crate::base_system::i18n::tr(
+            &app.config.ui_language,
+            "tui.status.empty_input_prompt",
+        )
+        .to_string();
         return Ok(());
     }
 
     if let Some(book_id) = parse_book_id(text) {
         app.focus = Focus::Input;
-        app.status = format!("准备下载书籍 {book_id} …");
+        app.status = format!(
+            "{} {book_id} …",
+            crate::base_system::i18n::tr(&app.config.ui_language, "tui.status.prepare_download_prefix")
+        );
         super::start_preview_task(app, book_id, BookMeta::default())?;
         app.input.clear();
         app.results.clear();
         app.list_state.select(None);
     } else if crate::base_system::book_id::is_short_link(text) {
         app.focus = Focus::Input;
-        app.status = "正在解析短链接…".to_string();
+        app.status = crate::base_system::i18n::tr(
+            &app.config.ui_language,
+            "tui.status.resolving_short_link",
+        )
+        .to_string();
         super::start_preview_task(app, text.to_string(), BookMeta::default())?;
         app.input.clear();
         app.results.clear();
@@ -406,15 +446,25 @@ fn current_selection_detail_lines(app: &App) -> Option<Vec<Line<'static>>> {
     let idx = app.list_state.selected()?;
     let item = app.results.get(idx)?;
     let mut lines = Vec::new();
+    let lang = &app.config.ui_language;
     lines.push(Line::from(format!(
-        "选中: 《{}》 | 作者: {} | ID: {}",
-        item.title, item.author, item.book_id
+        "{}: 《{}》 | {}: {} | {}: {}",
+        crate::base_system::i18n::tr(lang, "tui.detail.selected"),
+        item.title,
+        crate::base_system::i18n::tr(lang, "tui.detail.author"),
+        item.author,
+        crate::base_system::i18n::tr(lang, "tui.detail.id"),
+        item.book_id
     )));
 
     if let Some(detail) = item.detail.as_ref() {
         let mut status_parts: Vec<String> = Vec::new();
         if let Some(words) = detail.word_count {
-            status_parts.push(format!("字数: {}", super::format_word_count(words)));
+            status_parts.push(format!(
+                "{}: {}",
+                crate::base_system::i18n::tr(lang, "tui.detail.words"),
+                super::format_word_count(words)
+            ));
         }
         if !status_parts.is_empty() {
             lines.push(Line::from(status_parts.join(" | ")));
@@ -422,17 +472,29 @@ fn current_selection_detail_lines(app: &App) -> Option<Vec<Line<'static>>> {
 
         let mut meta_parts: Vec<String> = Vec::new();
         if let Some(score) = detail.score {
-            meta_parts.push(format!("评分: {:.1}", score));
+            meta_parts.push(format!(
+                "{}: {:.1}",
+                crate::base_system::i18n::tr(lang, "tui.detail.score"),
+                score
+            ));
         }
         if let Some(reads) = detail
             .read_count_text
             .as_ref()
             .or(detail.read_count.as_ref())
         {
-            meta_parts.push(format!("阅读: {}", reads));
+            meta_parts.push(format!(
+                "{}: {}",
+                crate::base_system::i18n::tr(lang, "tui.detail.reads"),
+                reads
+            ));
         }
         if let Some(cat) = detail.category.as_ref() {
-            meta_parts.push(format!("分类: {}", cat));
+            meta_parts.push(format!(
+                "{}: {}",
+                crate::base_system::i18n::tr(lang, "tui.detail.category"),
+                cat
+            ));
         }
         if !meta_parts.is_empty() {
             lines.push(Line::from(meta_parts.join(" | ")));
@@ -441,10 +503,18 @@ fn current_selection_detail_lines(app: &App) -> Option<Vec<Line<'static>>> {
         if detail.book_short_name.is_some() || detail.original_book_name.is_some() {
             let mut alias = Vec::new();
             if let Some(short) = detail.book_short_name.as_ref() {
-                alias.push(format!("别名: {}", short));
+                alias.push(format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(lang, "tui.detail.alias"),
+                    short
+                ));
             }
             if let Some(orig) = detail.original_book_name.as_ref() {
-                alias.push(format!("原名: {}", orig));
+                alias.push(format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(lang, "tui.detail.original"),
+                    orig
+                ));
             }
             lines.push(Line::from(alias.join(" | ")));
         }
@@ -452,10 +522,18 @@ fn current_selection_detail_lines(app: &App) -> Option<Vec<Line<'static>>> {
         if detail.first_chapter_title.is_some() || detail.last_chapter_title.is_some() {
             let mut bounds = Vec::new();
             if let Some(first) = detail.first_chapter_title.as_ref() {
-                bounds.push(format!("首章: {}", truncate(first, 48)));
+                bounds.push(format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(lang, "tui.detail.first_chapter"),
+                    truncate(first, 48)
+                ));
             }
             if let Some(last) = detail.last_chapter_title.as_ref() {
-                bounds.push(format!("末章: {}", truncate(last, 48)));
+                bounds.push(format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(lang, "tui.detail.last_chapter"),
+                    truncate(last, 48)
+                ));
             }
             if !bounds.is_empty() {
                 lines.push(Line::from(bounds.join(" | ")));
@@ -465,10 +543,22 @@ fn current_selection_detail_lines(app: &App) -> Option<Vec<Line<'static>>> {
         {
             let mut row = Vec::new();
             if let Some(cnt) = detail.chapter_count {
-                row.push(format!("章节: {}", cnt));
+                row.push(format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(lang, "tui.detail.chapters"),
+                    cnt
+                ));
             }
             if let Some(done) = detail.finished {
-                row.push(format!("状态: {}", if done { "完结" } else { "连载" }));
+                row.push(format!(
+                    "{}: {}",
+                    crate::base_system::i18n::tr(lang, "tui.detail.status"),
+                    if done {
+                        crate::base_system::i18n::tr(lang, "tui.detail.status_finished")
+                    } else {
+                        crate::base_system::i18n::tr(lang, "tui.detail.status_ongoing")
+                    }
+                ));
             }
             if !row.is_empty() {
                 lines.push(Line::from(row.join(" | ")));
@@ -476,15 +566,31 @@ fn current_selection_detail_lines(app: &App) -> Option<Vec<Line<'static>>> {
         }
 
         if !detail.tags.is_empty() {
-            lines.push(Line::from(format!("标签: {}", detail.tags.join(" | "))));
+            lines.push(Line::from(format!(
+                "{}: {}",
+                crate::base_system::i18n::tr(lang, "tui.detail.tags"),
+                detail.tags.join(" | ")
+            )));
         }
         if let Some(desc) = detail.description.as_ref() {
-            lines.push(Line::from(format!("简介: {}", truncate(desc, 220))));
+            lines.push(Line::from(format!(
+                "{}: {}",
+                crate::base_system::i18n::tr(lang, "tui.detail.desc"),
+                truncate(desc, 220)
+            )));
         } else {
-            lines.push(Line::from("简介: 暂无"));
+            lines.push(Line::from(format!(
+                "{}: {}",
+                crate::base_system::i18n::tr(lang, "tui.detail.desc"),
+                crate::base_system::i18n::tr(lang, "tui.detail.desc_none")
+            )));
         }
     } else {
-        lines.push(Line::from("简介: 未加载"));
+        lines.push(Line::from(format!(
+            "{}: {}",
+            crate::base_system::i18n::tr(lang, "tui.detail.desc"),
+            crate::base_system::i18n::tr(lang, "tui.detail.desc_unloaded")
+        )));
     }
 
     Some(lines)
@@ -510,18 +616,21 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
 
     let header_line = {
         #[cfg(feature = "official-api")]
-        let notice = "  |  本程序完全免费，若发现收费渠道，请勿上当受骗！";
+        let notice = crate::base_system::i18n::tr(&app.config.ui_language, "tui.home.notice_free");
         #[cfg(not(feature = "official-api"))]
-        let notice = "  |  c: 配置, q: 退出";
+        let notice = crate::base_system::i18n::tr(&app.config.ui_language, "tui.home.notice_keys");
 
         Line::from(vec![
             Span::styled(
-                "番茄小说下载器 TUI",
+                crate::base_system::i18n::tr(&app.config.ui_language, "tui.home.title"),
                 Style::default()
                     .fg(Color::Cyan)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::raw("  |  输出目录: "),
+            Span::raw(format!(
+                "  |  {}: ",
+                crate::base_system::i18n::tr(&app.config.ui_language, "tui.home.output_dir")
+            )),
             Span::styled(
                 app.config.default_save_dir().display().to_string(),
                 Style::default().fg(Color::Green),
@@ -539,7 +648,10 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
     let header = Paragraph::new(header_line).block(
         Block::default()
             .borders(Borders::ALL)
-            .title("Tomato Novel Downloader"),
+            .title(
+                crate::base_system::i18n::tr(&app.config.ui_language, "tui.home.block_title")
+                    .to_string(),
+            ),
     );
     frame.render_widget(header, layout[0]);
 
@@ -553,13 +665,16 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title("输入书名/ID/链接 (Enter 确认, Tab 切换)"),
+                .title(
+                    crate::base_system::i18n::tr(&app.config.ui_language, "tui.input.title")
+                        .to_string(),
+                ),
         );
     frame.render_widget(input, layout[1]);
 
-    let menu_items: Vec<ListItem> = MENU_ITEMS
+    let menu_items: Vec<ListItem> = MENU_ACTIONS
         .iter()
-        .map(|(label, _)| ListItem::new(*label))
+        .map(|a| ListItem::new(menu_action_label(&app.config.ui_language, *a)))
         .collect();
     let menu_style = if app.focus == Focus::Menu {
         Style::default().fg(Color::Yellow)
@@ -568,10 +683,12 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
     };
     let menu_block = Block::default()
         .borders(Borders::ALL)
-        .title("操作 (Enter 或鼠标点击)");
+        .title(
+            crate::base_system::i18n::tr(&app.config.ui_language, "tui.menu.title").to_string(),
+        );
     frame.render_widget(menu_block.clone(), layout[2]);
     let menu_inner = menu_block.inner(layout[2]);
-    let menu_len = MENU_ITEMS.len();
+    let menu_len = MENU_ACTIONS.len();
     let need_scrollbar =
         menu_len > 0 && menu_inner.height > 0 && menu_len > menu_inner.height as usize;
     let (menu_area, menu_sb_area) = if need_scrollbar && menu_inner.width > 0 {
@@ -609,7 +726,10 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
     }
 
     let items: Vec<ListItem> = if app.results.is_empty() {
-        vec![ListItem::new("无搜索结果")]
+        vec![ListItem::new(crate::base_system::i18n::tr(
+            &app.config.ui_language,
+            "tui.results.empty",
+        ))]
     } else {
         app.results
             .iter()
@@ -622,7 +742,9 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
 
     let results_block = Block::default()
         .borders(Borders::ALL)
-        .title("搜索结果 (上下选择, Enter 下载)");
+        .title(
+            crate::base_system::i18n::tr(&app.config.ui_language, "tui.results.title").to_string(),
+        );
     frame.render_widget(results_block.clone(), layout[3]);
     let results_inner = results_block.inner(layout[3]);
 
@@ -689,7 +811,17 @@ pub(super) fn draw_home(frame: &mut ratatui::Frame, app: &mut App) {
 
     let messages = Paragraph::new(msg_lines)
         .wrap(Wrap { trim: true })
-        .block(Block::default().borders(Borders::ALL).title("状态 / 消息"));
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(
+                    crate::base_system::i18n::tr(
+                        &app.config.ui_language,
+                        "tui.status.block_title",
+                    )
+                    .to_string(),
+                ),
+        );
 
     frame.render_widget(messages, layout[4]);
     super::render_log_box(frame, log_area, app);

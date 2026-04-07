@@ -49,6 +49,7 @@ use history::show_history_menu;
 use update::show_update_menu;
 
 use crate::base_system::context::{Config, safe_fs_name};
+use crate::base_system::i18n;
 use crate::base_system::json_extract;
 use crate::base_system::logging::take_broadcast_rx;
 use crate::download::downloader::{BookMeta, ChapterRange, DownloadPlan, ProgressSnapshot};
@@ -367,7 +368,7 @@ impl App {
         Self {
             input: String::new(),
             focus: Focus::Input,
-            status: "输入书名/ID/链接，Enter 确认，Tab 切换焦点，q 退出".to_string(),
+            status: i18n::tr(&config.ui_language, "tui.status.default").to_string(),
             messages: Vec::new(),
             logs: Vec::new(),
             results: Vec::new(),
@@ -988,14 +989,26 @@ pub(super) fn parse_range_input(input: &str, total: usize) -> Result<Option<Chap
     preview::parse_range_input(input, total)
 }
 
-const MENU_ITEMS: &[(&str, MenuAction)] = &[
-    ("确定", MenuAction::Confirm),
-    ("配置", MenuAction::Config),
-    ("更新", MenuAction::Update),
-    ("历史", MenuAction::History),
-    ("关于", MenuAction::About),
-    ("退出", MenuAction::Quit),
+const MENU_ACTIONS: &[MenuAction] = &[
+    MenuAction::Confirm,
+    MenuAction::Config,
+    MenuAction::Update,
+    MenuAction::History,
+    MenuAction::About,
+    MenuAction::Quit,
 ];
+
+pub(super) fn menu_action_label(lang: &str, action: MenuAction) -> String {
+    let key = match action {
+        MenuAction::Confirm => "tui.menu.confirm",
+        MenuAction::Config => "tui.menu.config",
+        MenuAction::Update => "tui.menu.update",
+        MenuAction::History => "tui.menu.history",
+        MenuAction::About => "tui.menu.about",
+        MenuAction::Quit => "tui.menu.quit",
+    };
+    i18n::tr(lang, key).to_string()
+}
 
 const SPINNER_FRAMES: &[char] = &['|', '/', '-', '\\'];
 
@@ -1378,7 +1391,7 @@ fn tick_prewarm_spinner(app: &mut App) {
 }
 
 pub(super) fn switch_view(app: &mut App, action: MenuAction) -> Result<()> {
-    let idx = MENU_ITEMS.iter().position(|(_, a)| *a == action);
+    let idx = MENU_ACTIONS.iter().position(|a| *a == action);
     if let Some(i) = idx {
         app.menu_state.select(Some(i));
     }
@@ -1386,14 +1399,14 @@ pub(super) fn switch_view(app: &mut App, action: MenuAction) -> Result<()> {
         MenuAction::Confirm => home::process_input(app)?,
         MenuAction::Config => {
             app.view = View::Config;
-            app.status = "进入配置编辑".to_string();
+            app.status = i18n::tr(&app.config.ui_language, "tui.status.enter_config").to_string();
             app.focus = Focus::Input;
         }
         MenuAction::Update => show_update_menu(app)?,
         MenuAction::History => show_history_menu(app)?,
         MenuAction::About => {
             app.view = View::About;
-            app.status = "关于".to_string();
+            app.status = i18n::tr(&app.config.ui_language, "tui.status.about").to_string();
         }
         MenuAction::Quit => app.should_quit = true,
     }
@@ -1402,16 +1415,16 @@ pub(super) fn switch_view(app: &mut App, action: MenuAction) -> Result<()> {
 
 pub(super) fn trigger_menu_action(app: &mut App) -> Result<()> {
     let idx = app.menu_state.selected().unwrap_or(0);
-    let action = MENU_ITEMS
+    let action = MENU_ACTIONS
         .get(idx)
-        .map(|(_, a)| *a)
+        .copied()
         .unwrap_or(MenuAction::Confirm);
     switch_view(app, action)
 }
 
 pub(super) fn start_search_task(app: &mut App, query: String) -> Result<()> {
     info!(target: "ui", "开始搜索: {query}");
-    start_spinner(app, "搜索中…");
+    start_spinner(app, i18n::tr(&app.config.ui_language, "tui.status.searching").to_string());
     let tx = app.worker_tx.clone();
     thread::spawn(move || {
         let result = search_books(&query);
