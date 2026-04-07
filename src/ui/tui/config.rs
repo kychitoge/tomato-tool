@@ -14,7 +14,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                     app.last_segment_comments_confirm_options = None;
                     app.cfg_editing = None;
                     app.cfg_edit_buffer.clear();
-                    app.status = "已取消开启段评".to_string();
+                    app.status = "Da huy bat binh luan doan".to_string();
                 }
                 KeyCode::Left | KeyCode::Right | KeyCode::Up | KeyCode::Down | KeyCode::Tab => {
                     let cur = app.segment_comments_confirm_state.selected().unwrap_or(1);
@@ -27,13 +27,13 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                         if let Some((cat_idx, entry_idx)) = app.segment_comments_confirm_ctx.take()
                             && let Err(err) = super::apply_cfg_edit(app, cat_idx, entry_idx)
                         {
-                            app.status = format!("保存失败: {err}");
+                            app.status = format!("Luu that bai: {err}");
                         }
                         app.cfg_editing = None;
                         app.cfg_edit_buffer.clear();
-                        app.status = "已开启段评（注意：可能触发 IP 风控，且下载更慢）".to_string();
+                        app.status = "Da bat binh luan doan (luu y: co the kich hoat kiem soat IP va tai cham hon)".to_string();
                     } else {
-                        app.status = "已取消开启段评".to_string();
+                        app.status = "Da huy bat binh luan doan".to_string();
                         app.segment_comments_confirm_ctx = None;
                         app.cfg_editing = None;
                         app.cfg_edit_buffer.clear();
@@ -62,14 +62,14 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                                     app.segment_comments_confirm_ctx.take()
                                     && let Err(err) = super::apply_cfg_edit(app, cat_idx, entry_idx)
                                 {
-                                    app.status = format!("保存失败: {err}");
+                                    app.status = format!("Luu that bai: {err}");
                                 }
                                 app.cfg_editing = None;
                                 app.cfg_edit_buffer.clear();
                                 app.status =
-                                    "已开启段评（注意：可能触发 IP 风控，且下载更慢）".to_string();
+                                    "Da bat binh luan doan (luu y: co the kich hoat kiem soat IP va tai cham hon)".to_string();
                             } else {
-                                app.status = "已取消开启段评".to_string();
+                                app.status = "Da huy bat binh luan doan".to_string();
                                 app.segment_comments_confirm_ctx = None;
                                 app.cfg_editing = None;
                                 app.cfg_edit_buffer.clear();
@@ -115,7 +115,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                     KeyCode::Esc => {
                         app.cfg_editing = None;
                         app.cfg_edit_buffer.clear();
-                        app.status = "取消修改".to_string();
+                        app.status = "Da huy chinh sua".to_string();
                     }
                     KeyCode::Enter => {
                         if editing_bool {
@@ -142,7 +142,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                                 app.segment_comments_confirm_open = true;
                                 app.segment_comments_confirm_ctx = Some((cat_idx, entry_idx));
                                 app.segment_comments_confirm_state.select(Some(1));
-                                app.status = "确认开启段评？".to_string();
+                                app.status = "Xac nhan bat binh luan doan?".to_string();
                                 return Ok(());
                             }
                         }
@@ -155,7 +155,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                             app.cfg_edit_buffer = preset.name.to_string();
                         }
                         if let Err(err) = super::apply_cfg_edit(app, cat_idx, entry_idx) {
-                            app.status = format!("保存失败: {err}");
+                            app.status = format!("Luu that bai: {err}");
                         } else {
                             app.cfg_editing = None;
                             app.cfg_edit_buffer.clear();
@@ -223,7 +223,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc | KeyCode::Char('c') => {
                         app.view = View::Home;
-                        app.status = "返回主菜单".to_string();
+                        app.status = "Quay ve menu chinh".to_string();
                         app.cfg_focus = ConfigFocus::Entry;
                     }
                     KeyCode::Tab => {
@@ -250,7 +250,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                     },
                     KeyCode::Enter if app.cfg_button_state.selected().is_some() => {
                         app.view = View::Home;
-                        app.status = "返回主菜单".to_string();
+                        app.status = "Quay ve menu chinh".to_string();
                     }
                     KeyCode::Enter => match app.cfg_focus {
                         ConfigFocus::Category => {
@@ -261,7 +261,7 @@ pub(super) fn handle_event_config(app: &mut App, event: Event) -> Result<()> {
                     },
                     KeyCode::Char('b') => {
                         app.view = View::Home;
-                        app.status = "返回主菜单".to_string();
+                        app.status = "Quay ve menu chinh".to_string();
                     }
                     _ => {}
                 }
@@ -396,12 +396,12 @@ pub(super) fn handle_mouse_config(app: &mut App, me: event::MouseEvent) -> Resul
                             app.segment_comments_confirm_open = true;
                             app.segment_comments_confirm_ctx = Some((cat_idx, entry_idx));
                             app.segment_comments_confirm_state.select(Some(1));
-                            app.status = "确认开启段评？".to_string();
+                            app.status = "Xac nhan bat binh luan doan?".to_string();
                             return Ok(());
                         }
 
                         if let Err(err) = super::apply_cfg_edit(app, cat_idx, entry_idx) {
-                            app.status = format!("保存失败: {err}");
+                            app.status = format!("Luu that bai: {err}");
                         } else {
                             app.cfg_editing = None;
                             app.cfg_edit_buffer.clear();
@@ -463,7 +463,7 @@ pub(super) fn handle_mouse_config(app: &mut App, me: event::MouseEvent) -> Resul
             {
                 app.cfg_button_state.select(Some(0));
                 app.view = View::Home;
-                app.status = "返回主菜单".to_string();
+                app.status = "Quay ve menu chinh".to_string();
                 return Ok(());
             }
 
@@ -606,12 +606,12 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
 
     let header_line = Line::from(vec![
         Span::styled(
-            "配置编辑",
+            "Chinh sua cau hinh",
             Style::default()
                 .fg(Color::Yellow)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::raw("  |  左右/Tab 切分类, 上下选项, 回车编辑, q 返回"),
+        Span::raw("  |  Trai/phai/Tab chuyen nhom, len/xuong chon, Enter sua, q quay lai"),
     ]);
 
     let header = Paragraph::new(header_line).block(
@@ -650,7 +650,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
         .collect();
     let cat_block = Block::default()
         .borders(Borders::ALL)
-        .title("分类 (左右/Tab 切换)");
+        .title("Nhom (trai/phai/Tab de chuyen)");
     frame.render_widget(cat_block.clone(), body[0]);
     let cat_inner = cat_block.inner(body[0]);
     let need_cat_scrollbar = !app.cfg_categories.is_empty()
@@ -704,7 +704,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
                     && Some(cat_i) == app.cfg_cat_state.selected()
                     && entry_i == idx
                 {
-                    spans.push(Span::raw("  [编辑中] "));
+                    spans.push(Span::raw("  [Dang sua] "));
                     if !super::cfg_field_is_bool(entry.field) {
                         spans.push(Span::styled(
                             app.cfg_edit_buffer.clone(),
@@ -716,7 +716,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
             })
             .collect()
     } else {
-        vec![ListItem::new("无可编辑配置")]
+        vec![ListItem::new("Khong co cau hinh de sua")]
     };
 
     let entry_highlight = if app.cfg_focus == ConfigFocus::Entry {
@@ -729,7 +729,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
 
     let entry_block = Block::default()
         .borders(Borders::ALL)
-        .title("配置项 (上下选择, 回车编辑/保存)");
+        .title("Muc cau hinh (len/xuong de chon, Enter de sua/luu)");
     frame.render_widget(entry_block.clone(), body[1]);
     let entry_inner = entry_block.inner(body[1]);
     let entry_len = super::current_cfg_entries(app)
@@ -777,9 +777,9 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
         .constraints([Constraint::Length(18), Constraint::Min(10)])
         .split(layout[2]);
 
-    let btn_items: Vec<ListItem> = vec![ListItem::new("返回")];
+    let btn_items: Vec<ListItem> = vec![ListItem::new("Quay lai")];
     let btn_list = List::new(btn_items)
-        .block(Block::default().borders(Borders::ALL).title("操作"))
+        .block(Block::default().borders(Borders::ALL).title("Thao tac"))
         .highlight_style(
             Style::default()
                 .fg(Color::LightCyan)
@@ -818,7 +818,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
             .block(
                 Block::default()
                     .borders(Borders::ALL)
-                    .title("选择值(方向键/鼠标，Enter保存)"),
+                    .title("Chon gia tri (mui ten/chuot, Enter de luu)"),
             )
             .highlight_style(
                 Style::default()
@@ -830,11 +830,11 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
         frame.render_stateful_widget(list, status_layout[0], &mut app.cfg_bool_state);
 
         msg_lines.push(Line::from(
-            "编辑中: 方向键选择 True/False，Enter 保存，Esc 取消。",
+            "Dang sua: dung mui ten chon True/False, Enter de luu, Esc de huy.",
         ));
         let messages = Paragraph::new(msg_lines)
             .wrap(Wrap { trim: true })
-            .block(Block::default().borders(Borders::ALL).title("状态"));
+            .block(Block::default().borders(Borders::ALL).title("Trang thai"));
         frame.render_widget(messages, status_layout[1]);
         app.last_config_combo_list_area = None;
         app.last_config_combo_input_area = None;
@@ -855,7 +855,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
             .unwrap_or(super::AUDIOBOOK_VOICE_PRESETS);
 
         let list_items: Vec<ListItem> = if presets.is_empty() {
-            vec![ListItem::new("无预设")]
+            vec![ListItem::new("Khong co preset")]
         } else {
             presets.iter().map(|p| ListItem::new(p.label)).collect()
         };
@@ -872,7 +872,7 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
             .block(
                 Block::default()
                     .borders(Borders::ALL)
-                    .title("发音人预设(↑↓/Tab 切换)"),
+                    .title("Preset giong doc (↑↓/Tab de chuyen)"),
             )
             .highlight_style(list_highlight)
             .highlight_symbol(">> ");
@@ -880,9 +880,9 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
         frame.render_stateful_widget(list, status_layout[0], &mut app.cfg_combo_state);
 
         let input_title = if app.cfg_combo_focus == ConfigComboFocus::Input {
-            "自定义输入(Enter 保存)"
+            "Nhap tuy chinh (Enter de luu)"
         } else {
-            "自定义输入(Tab 进入)"
+            "Nhap tuy chinh (Tab de vao)"
         };
         let input_border = if app.cfg_combo_focus == ConfigComboFocus::Input {
             Style::default().fg(Color::Yellow)
@@ -907,16 +907,16 @@ pub(super) fn draw_config(frame: &mut ratatui::Frame, app: &mut App) {
         app.last_config_combo_input_area = None;
 
         if app.cfg_editing.is_some() {
-            msg_lines.push(Line::from("编辑中: 回车保存，Esc 取消。"));
+            msg_lines.push(Line::from("Dang sua: Enter de luu, Esc de huy."));
         } else {
             msg_lines.push(Line::from(
-                "左右/Tab 切换分类，↑↓ 选择，Enter 编辑，鼠标点击或按钮返回。",
+                "Trai/phai/Tab chuyen nhom, ↑↓ chon, Enter sua, bam chuot hoac nut de quay lai.",
             ));
         }
 
         let messages = Paragraph::new(msg_lines)
             .wrap(Wrap { trim: true })
-            .block(Block::default().borders(Borders::ALL).title("状态"));
+            .block(Block::default().borders(Borders::ALL).title("Trang thai"));
 
         frame.render_widget(messages, footer[1]);
     }
@@ -948,7 +948,7 @@ fn render_segment_comments_confirm_modal(frame: &mut ratatui::Frame, app: &mut A
 
     let block = Block::default()
         .borders(Borders::ALL)
-        .title("确认开启段评？")
+        .title("Xac nhan bat binh luan doan?")
         .border_style(Style::default().fg(Color::Yellow));
     frame.render_widget(block, modal);
 
@@ -966,18 +966,18 @@ fn render_segment_comments_confirm_modal(frame: &mut ratatui::Frame, app: &mut A
         .split(inner);
 
     let msg = vec![
-        Line::from("段评会额外发送大量请求，容易触发 IP 风控。"),
-        Line::from("同时下载会明显变慢（尤其是开启头像/图片下载时）。"),
-        Line::from("建议：segment_comments_workers=1，关闭头像/图片下载。"),
+        Line::from("Binh luan doan se gui them rat nhieu request, de kich hoat kiem soat IP."),
+        Line::from("Toc do tai se cham di ro ret (dac biet khi bat tai avatar/hinh anh)."),
+        Line::from("Khuyen nghi: segment_comments_workers=1, tat tai avatar/hinh anh."),
         Line::from(""),
-        Line::from("Enter 确认 / Esc 取消 / ←→ 切换"),
+        Line::from("Enter xac nhan / Esc huy / ←→ chuyen"),
     ];
     let p = Paragraph::new(msg).wrap(Wrap { trim: true });
     frame.render_widget(p, parts[0]);
 
-    let items = vec![ListItem::new("仍然开启"), ListItem::new("取消")];
+    let items = vec![ListItem::new("Van bat"), ListItem::new("Huy")];
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("选择"))
+        .block(Block::default().borders(Borders::ALL).title("Lua chon"))
         .highlight_style(
             Style::default()
                 .fg(Color::LightCyan)

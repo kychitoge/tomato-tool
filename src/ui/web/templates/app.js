@@ -34,10 +34,10 @@ function updateThemeButton(theme) {
 
   if (isDark) {
     icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
-    if (label) label.textContent = '亮色模式';
+    if (label) label.textContent = 'Chế độ sáng';
   } else {
     icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
-    if (label) label.textContent = '暗色模式';
+    if (label) label.textContent = 'Chế độ tối';
   }
 }
 
@@ -95,7 +95,7 @@ async function requireLogin() {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ password: pw })
         });
-        if (!res.ok) { if (msg) msg.textContent = '密码错误'; return; }
+        if (!res.ok) { if (msg) msg.textContent = 'Sai mật khẩu'; return; }
         showLogin(false);
         form.removeEventListener('submit', handler);
         resolve(true);
@@ -309,18 +309,18 @@ function startWaitingForRestart() {
   if (bar) bar.style.width = '100%';
   if (pct) pct.textContent = '100%';
   if (stageEl) stageEl.textContent = 'restart';
-  if (msgEl) msgEl.textContent = '服务重启中，等待重连…';
+  if (msgEl) msgEl.textContent = 'Đang khởi động lại dịch vụ, chờ kết nối lại…';
 
   const hint = document.getElementById('appUpdateHint');
-  if (hint) hint.textContent = '更新完成，等待服务重启…';
+  if (hint) hint.textContent = 'Đã cập nhật xong, đang chờ dịch vụ khởi động lại…';
 
   // Poll /api/status every 2 s; reload once the new process responds
   const reconnTimer = setInterval(async () => {
     try {
       await fetchWithCreds('/api/status');
       clearInterval(reconnTimer);
-      if (msgEl) msgEl.textContent = '服务已重启，正在刷新页面…';
-      if (hint) hint.textContent = '更新完成，正在刷新…';
+      if (msgEl) msgEl.textContent = 'Dịch vụ đã khởi động lại, đang làm mới trang…';
+      if (hint) hint.textContent = 'Đã cập nhật xong, đang làm mới…';
       setTimeout(() => window.location.reload(), 600);
     } catch {
       // still offline, keep waiting
@@ -331,7 +331,7 @@ function startWaitingForRestart() {
 function applyDockerUpdateUi() {
   if (!isDockerBuild) return;
   const hint = document.getElementById('appUpdateHint');
-  if (hint) hint.textContent = 'Docker 构建已禁用程序自更新，请通过重新拉取镜像升级。';
+  if (hint) hint.textContent = 'Bản Docker đã tắt tự cập nhật, hãy cập nhật bằng cách kéo lại image mới.';
   showAppUpdateBanner(false);
   const btn = document.getElementById('appUpdateCheck');
   if (btn) btn.disabled = true;
@@ -350,12 +350,12 @@ async function refreshAppUpdate(manual) {
   if (isDockerBuild) {
     applyDockerUpdateUi();
     if (latestEl) latestEl.textContent = '';
-    if (bodyEl) bodyEl.textContent = 'Docker 构建已禁用程序自更新，请通过重新拉取镜像升级。';
+    if (bodyEl) bodyEl.textContent = 'Bản Docker đã tắt tự cập nhật, hãy cập nhật bằng cách kéo lại image mới.';
     if (linkEl) linkEl.style.pointerEvents = 'none';
     return { latestTag: '', hasUpdate: false, dockerBuild: true };
   }
 
-  if (hint) hint.textContent = manual ? '检查中…' : '';
+  if (hint) hint.textContent = manual ? 'Đang kiểm tra…' : '';
 
   const data = await j('/api/app_update');
   const latestTag = (data.latest_tag || '').toString();
@@ -375,14 +375,14 @@ async function refreshAppUpdate(manual) {
 
   if (shouldShow) {
     showAppUpdateBanner(true);
-    if (hint) hint.textContent = '发现新版本';
+    if (hint) hint.textContent = 'Phát hiện bản mới';
   } else {
     showAppUpdateBanner(false);
     if (manual) {
       if (!hasUpdate) {
-        if (hint) hint.textContent = '已是最新版本';
+        if (hint) hint.textContent = 'Đã là bản mới nhất';
       } else if (dismissed === latestTag) {
-        if (hint) hint.textContent = '已忽略该版本提醒';
+        if (hint) hint.textContent = 'Đã bỏ qua thông báo bản này';
       }
     }
   }
@@ -398,10 +398,10 @@ let pendingBookNameOptions = [];
 async function refreshStatus() {
   const data = await j('/api/status');
   document.getElementById('version').textContent = data.version || '';
-  document.getElementById('prewarm').textContent = data.prewarm_in_progress ? 'warming' : 'ready';
+  document.getElementById('prewarm').textContent = data.prewarm_in_progress ? 'đang khởi động' : 'sẵn sàng';
   document.getElementById('saveDir').textContent = data.save_dir || '';
   document.getElementById('bind').textContent = data.bind_addr || '';
-  document.getElementById('locked').textContent = data.locked ? 'locked' : 'unlocked';
+  document.getElementById('locked').textContent = data.locked ? 'đã khoá' : 'mở khoá';
   isDockerBuild = !!data.docker_build;
   applyDockerUpdateUi();
 }
@@ -438,7 +438,7 @@ async function refreshRawConfig() {
   const ta = document.getElementById('cfgRaw');
   const msg = document.getElementById('cfgRawMsg');
   if (ta) ta.value = (data.yaml || '').toString();
-  if (msg) msg.textContent = data.generated ? '已生成默认配置（未找到配置文件）' : '';
+    if (msg) msg.textContent = data.generated ? 'Đã tạo cấu hình mặc định (không tìm thấy tệp cấu hình)' : '';
 }
 
 async function saveRawConfig() {
@@ -457,103 +457,103 @@ let currentFullConfig = null;
 
 const FULL_CONFIG_SCHEMA = [
   {
-    title: '基础与格式',
+    title: 'Cơ bản và định dạng',
     fields: [
-      { key: 'save_path', label: '保存路径', type: 'text' },
-      { key: 'novel_format', label: '小说格式', type: 'select', options: [
+      { key: 'save_path', label: 'Đường dẫn lưu', type: 'text' },
+      { key: 'novel_format', label: 'Định dạng sách', type: 'select', options: [
         { value: 'txt', label: 'txt' }, { value: 'epub', label: 'epub' }
       ] },
-      { key: 'first_line_indent_em', label: '首行缩进(em)', type: 'number', parse: 'float', step: '0.1', min: '0' },
-      { key: 'bulk_files', label: '散装文件保存', type: 'bool' },
-      { key: 'auto_clear_dump', label: '自动清理缓存', type: 'bool' },
-      { key: 'auto_open_downloaded_files', label: '下载完成后自动打开', type: 'bool' },
-      { key: 'allow_overwrite_files', label: '允许覆盖已存在文件', type: 'bool' },
-      { key: 'preferred_book_name_field', label: '优先书名字段', type: 'select', options: [
-        { value: 'book_name', label: '默认书名' },
-        { value: 'original_book_name', label: '原始书名' },
-        { value: 'book_short_name', label: '短书名' },
-        { value: 'ask_after_download', label: '下载完后选择' }
+      { key: 'first_line_indent_em', label: 'Thụt dòng đầu (em)', type: 'number', parse: 'float', step: '0.1', min: '0' },
+      { key: 'bulk_files', label: 'Lưu file rời', type: 'bool' },
+      { key: 'auto_clear_dump', label: 'Tự dọn cache', type: 'bool' },
+      { key: 'auto_open_downloaded_files', label: 'Tự mở file sau khi tải', type: 'bool' },
+      { key: 'allow_overwrite_files', label: 'Cho phép ghi đè file đã tồn tại', type: 'bool' },
+      { key: 'preferred_book_name_field', label: 'Trường tên sách ưu tiên', type: 'select', options: [
+        { value: 'book_name', label: 'Tên mặc định' },
+        { value: 'original_book_name', label: 'Tên gốc' },
+        { value: 'book_short_name', label: 'Tên rút gọn' },
+        { value: 'ask_after_download', label: 'Hỏi sau khi tải xong' }
       ] },
-      { key: 'old_cli', label: '旧版 CLI UI', type: 'bool' },
+      { key: 'old_cli', label: 'Giao diện CLI cũ', type: 'bool' },
     ]
   },
   {
-    title: '网络与调度',
+    title: 'Mạng và điều phối',
     fields: [
-      { key: 'max_workers', label: '最大线程数', type: 'number', parse: 'int', min: '1' },
-      { key: 'request_timeout', label: '请求超时(s)', type: 'number', parse: 'int', min: '1' },
-      { key: 'max_retries', label: '最大重试次数', type: 'number', parse: 'int', min: '0' },
-      { key: 'min_connect_timeout', label: '最小连接超时(s)', type: 'number', parse: 'float', step: '0.1', min: '0' },
-      { key: 'min_wait_time', label: '最小等待时间(ms)', type: 'number', parse: 'int', min: '0' },
-      { key: 'max_wait_time', label: '最大等待时间(ms)', type: 'number', parse: 'int', min: '0' },
+      { key: 'max_workers', label: 'Số luồng tối đa', type: 'number', parse: 'int', min: '1' },
+      { key: 'request_timeout', label: 'Timeout request (s)', type: 'number', parse: 'int', min: '1' },
+      { key: 'max_retries', label: 'Số lần thử lại tối đa', type: 'number', parse: 'int', min: '0' },
+      { key: 'min_connect_timeout', label: 'Timeout kết nối tối thiểu (s)', type: 'number', parse: 'float', step: '0.1', min: '0' },
+      { key: 'min_wait_time', label: 'Thời gian chờ tối thiểu (ms)', type: 'number', parse: 'int', min: '0' },
+      { key: 'max_wait_time', label: 'Thời gian chờ tối đa (ms)', type: 'number', parse: 'int', min: '0' },
     ]
   },
   {
     title: 'API',
     fields: [
-      { key: 'use_official_api', label: '使用官方 API', type: 'bool' },
-      { key: 'api_endpoints', label: 'API 列表', type: 'list', placeholder: '每行一条或用逗号分隔' },
+      { key: 'use_official_api', label: 'Dùng API chính thức', type: 'bool' },
+      { key: 'api_endpoints', label: 'Danh sách API', type: 'list', placeholder: 'Mỗi dòng một mục hoặc phân tách bằng dấu phẩy' },
     ]
   },
   {
-    title: '段评',
+    title: 'Bình luận theo đoạn',
     fields: [
-      { key: 'enable_segment_comments', label: '启用段评', type: 'bool' },
-      { key: 'segment_comments_top_n', label: '每段评论数上限', type: 'number', parse: 'int', min: '1' },
-      { key: 'segment_comments_workers', label: '段评并发线程数', type: 'number', parse: 'int', min: '1' },
+      { key: 'enable_segment_comments', label: 'Bật bình luận theo đoạn', type: 'bool' },
+      { key: 'segment_comments_top_n', label: 'Số bình luận tối đa mỗi đoạn', type: 'number', parse: 'int', min: '1' },
+      { key: 'segment_comments_workers', label: 'Số luồng bình luận theo đoạn', type: 'number', parse: 'int', min: '1' },
     ]
   },
   {
-    title: '媒体下载',
+    title: 'Tải media',
     fields: [
-      { key: 'download_comment_images', label: '下载评论图片', type: 'bool' },
-      { key: 'download_comment_avatars', label: '下载评论头像', type: 'bool' },
-      { key: 'media_download_workers', label: '媒体下载线程数', type: 'number', parse: 'int', min: '1' },
-      { key: 'blocked_media_domains', label: '阻止的图片域名', type: 'list', placeholder: '每行一个域名' },
-      { key: 'force_convert_images_to_jpeg', label: '强制转成 JPEG', type: 'bool' },
-      { key: 'jpeg_retry_convert', label: '失败重试再转 JPEG', type: 'bool' },
-      { key: 'jpeg_quality', label: 'JPEG 质量(0-100)', type: 'number', parse: 'int', min: '0', max: '100' },
-      { key: 'convert_heic_to_jpeg', label: 'HEIC 转 JPEG', type: 'bool' },
-      { key: 'keep_heic_original', label: '保留 HEIC 原图', type: 'bool' },
-      { key: 'media_limit_per_chapter', label: '单章节媒体上限', type: 'number', parse: 'int', min: '0' },
-      { key: 'media_max_dimension_px', label: '媒体最大尺寸(px)', type: 'number', parse: 'int', min: '0' },
+      { key: 'download_comment_images', label: 'Tải ảnh bình luận', type: 'bool' },
+      { key: 'download_comment_avatars', label: 'Tải avatar bình luận', type: 'bool' },
+      { key: 'media_download_workers', label: 'Số luồng tải media', type: 'number', parse: 'int', min: '1' },
+      { key: 'blocked_media_domains', label: 'Tên miền ảnh bị chặn', type: 'list', placeholder: 'Mỗi dòng một tên miền' },
+      { key: 'force_convert_images_to_jpeg', label: 'Ép chuyển sang JPEG', type: 'bool' },
+      { key: 'jpeg_retry_convert', label: 'Thử lại rồi chuyển JPEG khi lỗi', type: 'bool' },
+      { key: 'jpeg_quality', label: 'Chất lượng JPEG (0-100)', type: 'number', parse: 'int', min: '0', max: '100' },
+      { key: 'convert_heic_to_jpeg', label: 'Chuyển HEIC sang JPEG', type: 'bool' },
+      { key: 'keep_heic_original', label: 'Giữ nguyên ảnh HEIC gốc', type: 'bool' },
+      { key: 'media_limit_per_chapter', label: 'Giới hạn media mỗi chương', type: 'number', parse: 'int', min: '0' },
+      { key: 'media_max_dimension_px', label: 'Kích thước media tối đa (px)', type: 'number', parse: 'int', min: '0' },
     ]
   },
   {
-    title: '有声书',
+    title: 'Sách nói',
     fields: [
-      { key: 'enable_audiobook', label: '启用有声书', type: 'bool' },
-      { key: 'audiobook_voice', label: '发音人', type: 'voice' },
-      { key: 'audiobook_tts_provider', label: 'TTS 服务类型', type: 'select', options: [
+      { key: 'enable_audiobook', label: 'Bật sách nói', type: 'bool' },
+      { key: 'audiobook_voice', label: 'Giọng đọc', type: 'voice' },
+      { key: 'audiobook_tts_provider', label: 'Loại dịch vụ TTS', type: 'select', options: [
         { value: 'edge', label: 'edge' }, { value: 'third_party', label: 'third_party' }
       ] },
-      { key: 'audiobook_tts_api_url', label: '第三方 TTS API 地址', type: 'text' },
-      { key: 'audiobook_tts_api_token', label: '第三方 TTS Token', type: 'text' },
-      { key: 'audiobook_tts_model', label: '第三方 TTS 模型', type: 'text' },
-      { key: 'audiobook_rate', label: '语速调整', type: 'text' },
-      { key: 'audiobook_volume', label: '音量调整', type: 'text' },
-      { key: 'audiobook_pitch', label: '音调调整', type: 'text' },
-      { key: 'audiobook_format', label: '输出格式', type: 'select', options: [
+      { key: 'audiobook_tts_api_url', label: 'Địa chỉ API TTS bên thứ ba', type: 'text' },
+      { key: 'audiobook_tts_api_token', label: 'Token TTS bên thứ ba', type: 'text' },
+      { key: 'audiobook_tts_model', label: 'Mô hình TTS bên thứ ba', type: 'text' },
+      { key: 'audiobook_rate', label: 'Chỉnh tốc độ đọc', type: 'text' },
+      { key: 'audiobook_volume', label: 'Chỉnh âm lượng', type: 'text' },
+      { key: 'audiobook_pitch', label: 'Chỉnh cao độ', type: 'text' },
+      { key: 'audiobook_format', label: 'Định dạng xuất', type: 'select', options: [
         { value: 'mp3', label: 'mp3' }, { value: 'wav', label: 'wav' }
       ] },
-      { key: 'audiobook_concurrency', label: '并发生成章节数', type: 'number', parse: 'int', min: '1' },
+      { key: 'audiobook_concurrency', label: 'Số chương tạo đồng thời', type: 'number', parse: 'int', min: '1' },
     ]
   },
 ];
 
 const AUDIOBOOK_VOICE_PRESETS = [
-  { value: 'zh-CN-XiaoxiaoNeural', label: 'zh-CN-XiaoxiaoNeural (女)' },
-  { value: 'zh-CN-XiaoyiNeural', label: 'zh-CN-XiaoyiNeural (女)' },
-  { value: 'zh-CN-YunjianNeural', label: 'zh-CN-YunjianNeural (男)' },
-  { value: 'zh-CN-YunxiNeural', label: 'zh-CN-YunxiNeural (男)' },
-  { value: 'zh-CN-YunxiaNeural', label: 'zh-CN-YunxiaNeural (男)' },
-  { value: 'zh-CN-YunyangNeural', label: 'zh-CN-YunyangNeural (男)' },
-  { value: 'zh-CN-liaoning-XiaobeiNeural', label: 'zh-CN-liaoning-XiaobeiNeural (女)' },
-  { value: 'zh-CN-shaanxi-XiaoniNeural', label: 'zh-CN-shaanxi-XiaoniNeural (女)' },
-  { value: 'zh-HK-HiuGaaiNeural', label: 'zh-HK-HiuGaaiNeural (女)' },
-  { value: 'zh-HK-HiuMaanNeural', label: 'zh-HK-HiuMaanNeural (女)' },
-  { value: 'zh-HK-WanLungNeural', label: 'zh-HK-WanLungNeural (男)' },
-  { value: 'zh-TW-HsiaoChenNeural', label: 'zh-TW-HsiaoChenNeural (女)' },
+  { value: 'zh-CN-XiaoxiaoNeural', label: 'zh-CN-XiaoxiaoNeural (Nữ)' },
+  { value: 'zh-CN-XiaoyiNeural', label: 'zh-CN-XiaoyiNeural (Nữ)' },
+  { value: 'zh-CN-YunjianNeural', label: 'zh-CN-YunjianNeural (Nam)' },
+  { value: 'zh-CN-YunxiNeural', label: 'zh-CN-YunxiNeural (Nam)' },
+  { value: 'zh-CN-YunxiaNeural', label: 'zh-CN-YunxiaNeural (Nam)' },
+  { value: 'zh-CN-YunyangNeural', label: 'zh-CN-YunyangNeural (Nam)' },
+  { value: 'zh-CN-liaoning-XiaobeiNeural', label: 'zh-CN-liaoning-XiaobeiNeural (Nữ)' },
+  { value: 'zh-CN-shaanxi-XiaoniNeural', label: 'zh-CN-shaanxi-XiaoniNeural (Nữ)' },
+  { value: 'zh-HK-HiuGaaiNeural', label: 'zh-HK-HiuGaaiNeural (Nữ)' },
+  { value: 'zh-HK-HiuMaanNeural', label: 'zh-HK-HiuMaanNeural (Nữ)' },
+  { value: 'zh-HK-WanLungNeural', label: 'zh-HK-WanLungNeural (Nam)' },
+  { value: 'zh-TW-HsiaoChenNeural', label: 'zh-TW-HsiaoChenNeural (Nữ)' },
 ];
 
 function renderFullConfigForm(cfg) {
@@ -587,7 +587,7 @@ function renderFullConfigForm(cfg) {
         const select = document.createElement('select');
         const emptyOpt = document.createElement('option');
         emptyOpt.value = '';
-        emptyOpt.textContent = '自定义...';
+        emptyOpt.textContent = 'Tùy chỉnh...';
         select.appendChild(emptyOpt);
         for (const opt of AUDIOBOOK_VOICE_PRESETS) {
           const o = document.createElement('option');
@@ -598,7 +598,7 @@ function renderFullConfigForm(cfg) {
         const text = document.createElement('input');
         text.type = 'text';
         text.value = (cfg[field.key] ?? '').toString();
-        text.placeholder = '输入或选择发音人';
+        text.placeholder = 'Nhập hoặc chọn giọng đọc';
         text.dataset.key = field.key;
         text.dataset.type = 'text';
         text.dataset.voiceInput = '1';
@@ -652,14 +652,14 @@ function renderFullConfigForm(cfg) {
 
 async function loadFullConfigPanel() {
   const msg = document.getElementById('cfgFullMsg');
-  if (msg) msg.textContent = '加载中…';
+  if (msg) msg.textContent = 'Đang tải…';
   try {
     const cfg = await j('/api/config/full');
     currentFullConfig = cfg || {};
     renderFullConfigForm(currentFullConfig);
     if (msg) msg.textContent = '';
   } catch (err) {
-    if (msg) msg.textContent = '加载失败';
+    if (msg) msg.textContent = 'Tải thất bại';
   }
 }
 
@@ -722,29 +722,29 @@ async function refreshLibrary() {
     const hrefFile = `/download/${encodedRel}`;
     const hrefZip = `/download-zip/${encodedRel}`;
     const sizeText = kind === 'dir'
-      ? `${fmtBytes(it.size)} (${Number(it.file_count || 0)} 文件)`
+      ? `${fmtBytes(it.size)} (${Number(it.file_count || 0)} file)`
       : fmtBytes(it.size);
     const timeText = fmtTime(it.modified_ms);
 
     if (kind === 'dir') {
       tr.innerHTML = `
-        <td><button class="openDir sm" data-path="${esc(rel)}">打开</button> ${esc(name)} <span class="badge">文件夹</span></td>
+        <td><button class="openDir sm" data-path="${esc(rel)}">Mở</button> ${esc(name)} <span class="badge">Thư mục</span></td>
         <td>${esc(sizeText)}</td>
         <td>${esc(timeText)}</td>
-        <td><a href="${hrefZip}">打包下载</a></td>
+        <td><a href="${hrefZip}">Tải zip</a></td>
       `;
     } else {
       tr.innerHTML = `
         <td><a href="${hrefFile}">${esc(name)}</a> <span class="badge">${esc(it.ext || '')}</span></td>
         <td>${esc(sizeText)}</td>
         <td>${esc(timeText)}</td>
-        <td><a href="${hrefFile}">下载</a></td>
+        <td><a href="${hrefFile}">Tải xuống</a></td>
       `;
     }
     tbody.appendChild(tr);
   }
   if (items.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">暂无文件，先下载一本书吧</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Chưa có file nào, hãy tải một cuốn sách trước</td></tr>';
   }
 }
 
@@ -757,7 +757,7 @@ async function doSearch(q) {
   const data = await j(`/api/search?q=${encodeURIComponent(q)}`);
   const items = data.items || [];
   if (items.length === 0) {
-    out.innerHTML = '<tr class="empty-row"><td colspan="4">无结果</td></tr>';
+    out.innerHTML = '<tr class="empty-row"><td colspan="4">Không có kết quả</td></tr>';
     return;
   }
   for (const b of items) {
@@ -766,7 +766,7 @@ async function doSearch(q) {
       <td>${esc(b.title ?? '')}</td>
       <td>${esc(b.author ?? '')}</td>
       <td><code>${esc(b.book_id)}</code></td>
-      <td><button data-bookid="${esc(b.book_id)}" class="startDownload sm primary">下载</button></td>
+      <td><button data-bookid="${esc(b.book_id)}" class="startDownload sm primary">Tải</button></td>
     `;
     out.appendChild(tr);
   }
@@ -825,32 +825,32 @@ async function openPreview(bookId) {
     const chapters = document.getElementById('previewChapters');
     const cover = document.getElementById('previewCover');
 
-    if (title) title.textContent = preview.book_name || '未知书名';
+    if (title) title.textContent = preview.book_name || 'Tên sách không xác định';
 
     if (origTitle) {
       if (preview.original_book_name && preview.original_book_name !== preview.book_name) {
-        origTitle.textContent = `原名: ${preview.original_book_name}`;
+        origTitle.textContent = `Tên gốc: ${preview.original_book_name}`;
         origTitle.classList.remove('hidden');
       } else {
         origTitle.classList.add('hidden');
       }
     }
 
-    if (author) author.textContent = preview.author ? `作者: ${preview.author}` : '作者: 未知';
+    if (author) author.textContent = preview.author ? `Tác giả: ${preview.author}` : 'Tác giả: không xác định';
 
     if (stats) {
       const parts = [];
-      if (preview.chapter_count) parts.push(`章节: ${preview.chapter_count}`);
+      if (preview.chapter_count) parts.push(`Chương: ${preview.chapter_count}`);
       if (preview.finished !== null && preview.finished !== undefined) {
-        parts.push(`状态: ${preview.finished ? '完结' : '连载'}`);
+        parts.push(`Trạng thái: ${preview.finished ? 'Hoàn thành' : 'Đang đăng'}`);
       }
       if (preview.word_count) {
         const words = Number(preview.word_count);
-        parts.push(`字数: ${words >= 10000 ? (words / 10000).toFixed(1) + '万' : words}字`);
+        parts.push(`Số chữ: ${words >= 10000 ? (words / 10000).toFixed(1) + ' vạn' : words} chữ`);
       }
-      if (preview.score != null) parts.push(`评分: ${preview.score.toFixed(1)}`);
+      if (preview.score != null) parts.push(`Đánh giá: ${preview.score.toFixed(1)}`);
       if (preview.read_count_text || preview.read_count) {
-        parts.push(`阅读: ${preview.read_count_text || preview.read_count}`);
+        parts.push(`Lượt đọc: ${preview.read_count_text || preview.read_count}`);
       }
       stats.innerHTML = '';
       parts.forEach(p => {
@@ -860,7 +860,7 @@ async function openPreview(bookId) {
       });
     }
 
-    if (desc) desc.textContent = preview.description || '暂无简介';
+    if (desc) desc.textContent = preview.description || 'Chưa có giới thiệu';
 
     if (tags) {
       if (preview.tags && preview.tags.length > 0) {
@@ -879,10 +879,10 @@ async function openPreview(bookId) {
 
     if (chapters) {
       const chapterInfo = [];
-      if (preview.chapter_count) chapterInfo.push(`总章节数: ${preview.chapter_count}`);
-      if (preview.first_chapter_title) chapterInfo.push(`首章: ${preview.first_chapter_title}`);
-      if (preview.last_chapter_title) chapterInfo.push(`末章: ${preview.last_chapter_title}`);
-      if (preview.category) chapterInfo.push(`分类: ${preview.category}`);
+      if (preview.chapter_count) chapterInfo.push(`Tổng số chương: ${preview.chapter_count}`);
+      if (preview.first_chapter_title) chapterInfo.push(`Chương đầu: ${preview.first_chapter_title}`);
+      if (preview.last_chapter_title) chapterInfo.push(`Chương cuối: ${preview.last_chapter_title}`);
+      if (preview.category) chapterInfo.push(`Thể loại: ${preview.category}`);
       chapters.innerHTML = '';
       chapterInfo.forEach(info => {
         const div = document.createElement('div');
@@ -917,10 +917,10 @@ async function openPreview(bookId) {
     }
 
     if (rangeHint && preview.chapter_count) {
-      rangeHint.textContent = `例如: 1-10 下载第1到第10章，1-${preview.chapter_count} 下载全部`;
+      rangeHint.textContent = `Ví dụ: 1-10 tải từ chương 1 đến 10, 1-${preview.chapter_count} tải toàn bộ`;
     }
   } catch (err) {
-    if (loading) loading.textContent = `加载失败: ${err}`;
+    if (loading) loading.textContent = `Tải thất bại: ${err}`;
     console.error('Preview load error:', err);
   }
 }
@@ -939,7 +939,7 @@ async function confirmPreview() {
   if (rangeText) {
     const total = currentPreviewData.chapter_count || 0;
     if (total === 0) {
-      if (rangeHint) { rangeHint.textContent = '章节数未知，无法使用范围下载'; rangeHint.classList.add('error'); }
+      if (rangeHint) { rangeHint.textContent = 'Không biết số chương, không thể tải theo phạm vi'; rangeHint.classList.add('error'); }
       return;
     }
     const parts = rangeText.split('-').map(p => p.trim());
@@ -947,13 +947,13 @@ async function confirmPreview() {
       const start = parts[0] === '' ? 1 : parseInt(parts[0], 10);
       const end = parts[1] === '' ? total : parseInt(parts[1], 10);
       if (isNaN(start) || isNaN(end) || start < 1 || end < 1 || start > end || end > total) {
-        if (rangeHint) { rangeHint.textContent = `范围无效 (1-${total})`; rangeHint.classList.add('error'); }
+        if (rangeHint) { rangeHint.textContent = `Phạm vi không hợp lệ (1-${total})`; rangeHint.classList.add('error'); }
         return;
       }
       rangeStart = start;
       rangeEnd = end;
     } else {
-      if (rangeHint) { rangeHint.textContent = '格式应为 start-end，例如 1-10'; rangeHint.classList.add('error'); }
+      if (rangeHint) { rangeHint.textContent = 'Định dạng phải là start-end, ví dụ 1-10'; rangeHint.classList.add('error'); }
       return;
     }
   }
@@ -977,11 +977,11 @@ async function confirmPreview() {
     const hint = document.getElementById('searchHint');
     if (hint) {
       hint.textContent = rangeStart && rangeEnd
-        ? `已创建下载任务：${bookId} (章节 ${rangeStart}-${rangeEnd})`
-        : `已创建下载任务：${bookId}`;
+        ? `Đã tạo tác vụ tải: ${bookId} (chương ${rangeStart}-${rangeEnd})`
+        : `Đã tạo tác vụ tải: ${bookId}`;
     }
   } catch (err) {
-    alert(`创建任务失败: ${err}`);
+    alert(`Tạo tác vụ thất bại: ${err}`);
   }
 }
 
@@ -1028,11 +1028,11 @@ async function refreshJobs() {
     let stateHtml;
     switch (vState) {
       case 'running': stateHtml = `<span class="badge info">${pct}%</span>`; break;
-      case 'queued':  stateHtml = '<span class="badge">排队中</span>'; break;
-      case 'done':    stateHtml = '<span class="badge success">完成</span>'; break;
-      case 'failed':  stateHtml = '<span class="badge danger">失败</span>'; break;
-      case 'partial': stateHtml = '<span class="badge warning">部分失败</span>'; break;
-      case 'canceled':stateHtml = '<span class="badge">已取消</span>'; break;
+      case 'queued':  stateHtml = '<span class="badge">Đang xếp hàng</span>'; break;
+      case 'done':    stateHtml = '<span class="badge success">Hoàn tất</span>'; break;
+      case 'failed':  stateHtml = '<span class="badge danger">Thất bại</span>'; break;
+      case 'partial': stateHtml = '<span class="badge warning">Thất bại một phần</span>'; break;
+      case 'canceled':stateHtml = '<span class="badge">Đã huỷ</span>'; break;
       default:        stateHtml = esc(it.state || '');
     }
 
@@ -1040,17 +1040,17 @@ async function refreshJobs() {
     let btnHtml;
     switch (vState) {
       case 'done':
-        btnHtml = `<button data-jobid="${esc(it.id)}" data-title="${esc(title)}" class="goLibrary sm success">完成</button>`;
+        btnHtml = `<button data-jobid="${esc(it.id)}" data-title="${esc(title)}" class="goLibrary sm success">Xong</button>`;
         break;
       case 'failed':
       case 'partial':
-        btnHtml = `<button data-jobid="${esc(it.id)}" data-bookid="${esc(it.book_id)}" class="retryJob sm warning">重试</button>`;
+        btnHtml = `<button data-jobid="${esc(it.id)}" data-bookid="${esc(it.book_id)}" class="retryJob sm warning">Thử lại</button>`;
         break;
       case 'canceled':
-        btnHtml = `<button data-jobid="${esc(it.id)}" data-bookid="${esc(it.book_id)}" class="retryJob sm">重试</button>`;
+        btnHtml = `<button data-jobid="${esc(it.id)}" data-bookid="${esc(it.book_id)}" class="retryJob sm">Thử lại</button>`;
         break;
       default: // running / queued
-        btnHtml = `<button data-jobid="${esc(it.id)}" class="cancelJob sm">取消</button>`;
+        btnHtml = `<button data-jobid="${esc(it.id)}" class="cancelJob sm">Huỷ</button>`;
     }
 
     tr.innerHTML = `
@@ -1063,7 +1063,7 @@ async function refreshJobs() {
     tbody.appendChild(tr);
   }
   if ((data.items || []).length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">暂无任务</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Chưa có tác vụ nào</td></tr>';
   }
 
   const pending = (data.items || []).find(it => (it.book_name_options || []).length > 0);
@@ -1078,8 +1078,8 @@ async function refreshHistory() {
   const kw = (document.getElementById('historyKeyword')?.value || '').toString().trim();
   if (!body) return;
 
-  if (hint) hint.textContent = '加载中…';
-  body.innerHTML = '<tr class="empty-row"><td colspan="6">加载中…</td></tr>';
+  if (hint) hint.textContent = 'Đang tải…';
+  body.innerHTML = '<tr class="empty-row"><td colspan="6">Đang tải…</td></tr>';
 
   const qs = new URLSearchParams();
   qs.set('limit', '200');
@@ -1093,8 +1093,8 @@ async function refreshHistory() {
     const tr = document.createElement('tr');
     const status = (it.status || '').toString().toLowerCase();
     const badge = status === 'success'
-      ? '<span class="badge success">成功</span>'
-      : '<span class="badge danger">失败</span>';
+      ? '<span class="badge success">Thành công</span>'
+      : '<span class="badge danger">Thất bại</span>';
     tr.innerHTML = `
       <td>${esc(it.timestamp || '')}</td>
       <td>${esc(it.book_name || '')}</td>
@@ -1107,9 +1107,9 @@ async function refreshHistory() {
   }
 
   if (items.length === 0) {
-    body.innerHTML = '<tr class="empty-row"><td colspan="6">暂无历史记录</td></tr>';
+    body.innerHTML = '<tr class="empty-row"><td colspan="6">Chưa có lịch sử</td></tr>';
   }
-  if (hint) hint.textContent = `共 ${items.length} 条`;
+  if (hint) hint.textContent = `Tổng ${items.length} mục`;
 }
 
 // ── Updates ────────────────────────────────────────────────────────
@@ -1119,15 +1119,15 @@ async function refreshUpdates() {
   const tbody = document.getElementById('updatesBody');
   if (!tbody) return;
 
-  if (hint) hint.textContent = '扫描中…';
-  tbody.innerHTML = '<tr class="empty-row"><td colspan="7">加载中…</td></tr>';
+  if (hint) hint.textContent = 'Đang quét…';
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Đang tải…</td></tr>';
 
   const data = await j('/api/updates');
   const updates = data.updates || [];
   const noUpdates = data.no_updates || [];
   const total = updates.length + noUpdates.length;
 
-  if (hint) hint.textContent = `可更新 ${updates.length} 本 / 无更新 ${noUpdates.length} 本 / 总计 ${total} 本`;
+  if (hint) hint.textContent = `Có thể cập nhật ${updates.length} cuốn / không có cập nhật ${noUpdates.length} cuốn / tổng ${total} cuốn`;
 
   tbody.innerHTML = '';
   for (const it of updates) {
@@ -1139,12 +1139,12 @@ async function refreshUpdates() {
       <td>${esc(Number(it.remote_total || 0))}</td>
       <td>${esc(Number(it.new_count || 0))}</td>
       <td>${esc(Number(it.local_failed || 0))}</td>
-      <td><button data-bookid="${esc(it.book_id || '')}" class="startDownload sm primary">更新</button></td>
+      <td><button data-bookid="${esc(it.book_id || '')}" class="startDownload sm primary">Cập nhật</button></td>
     `;
     tbody.appendChild(tr);
   }
   if (updates.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">暂无可更新的小说</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Không có sách nào cần cập nhật</td></tr>';
   }
 }
 
@@ -1279,11 +1279,11 @@ function wire() {
       if (bookId) {
         try {
           await startDownload(bookId);
-          if (hint) hint.textContent = `已创建下载任务：${bookId}`;
+          if (hint) hint.textContent = `Đã tạo tác vụ tải: ${bookId}`;
           const out = document.getElementById('searchResults');
-          if (out) out.innerHTML = '<tr class="empty-row"><td colspan="4">已加入任务队列，可在"任务"页查看进度</td></tr>';
+          if (out) out.innerHTML = '<tr class="empty-row"><td colspan="4">Đã thêm vào hàng đợi tác vụ, có thể xem tiến độ ở trang "Tác vụ"</td></tr>';
         } catch (err) {
-          if (hint) hint.textContent = '创建任务失败';
+          if (hint) hint.textContent = 'Tạo tác vụ thất bại';
           alert(err);
         }
         return;
@@ -1312,7 +1312,7 @@ function wire() {
         setDismissedTag(latestTag);
         showAppUpdateBanner(false);
         const hint = document.getElementById('appUpdateHint');
-        if (hint) hint.textContent = '已设置不再提醒';
+        if (hint) hint.textContent = 'Đã đặt không nhắc lại';
       }
     } catch (err) { alert(err); }
   });
@@ -1320,13 +1320,13 @@ function wire() {
   const selfUpdBtn = document.getElementById('appSelfUpdate');
   if (selfUpdBtn) selfUpdBtn.addEventListener('click', async () => {
     const hint = document.getElementById('appUpdateHint');
-    if (hint) hint.textContent = '自更新启动中…';
+    if (hint) hint.textContent = 'Đang khởi động tự cập nhật…';
     try {
       await j('/api/self_update', { method: 'POST' });
-      if (hint) hint.textContent = '自更新任务已启动';
+      if (hint) hint.textContent = 'Tác vụ tự cập nhật đã bắt đầu';
       await pollSelfUpdateStatus();
     } catch (err) {
-      if (hint) hint.textContent = '自更新触发失败';
+      if (hint) hint.textContent = 'Kích hoạt tự cập nhật thất bại';
       alert(err);
     }
   });
@@ -1349,12 +1349,12 @@ function wire() {
   if (cfgForm) cfgForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = document.getElementById('configMsg');
-    if (msg) msg.textContent = '保存中…';
+    if (msg) msg.textContent = 'Đang lưu…';
     try {
       await saveConfig();
-      if (msg) msg.textContent = '已保存';
+      if (msg) msg.textContent = 'Đã lưu';
     } catch (err) {
-      if (msg) msg.textContent = '保存失败';
+      if (msg) msg.textContent = 'Lưu thất bại';
       alert(err);
     }
   });
@@ -1363,14 +1363,14 @@ function wire() {
   const cfgFullSave = document.getElementById('cfgFullSave');
   if (cfgFullSave) cfgFullSave.addEventListener('click', async () => {
     const msg = document.getElementById('cfgFullMsg');
-    if (msg) msg.textContent = '保存中…';
+    if (msg) msg.textContent = 'Đang lưu…';
     try {
       await saveFullConfig();
       await refreshConfig();
       await refreshRawConfig();
-      if (msg) msg.textContent = '已保存';
+      if (msg) msg.textContent = 'Đã lưu';
     } catch (err) {
-      if (msg) msg.textContent = '保存失败';
+      if (msg) msg.textContent = 'Lưu thất bại';
       alert(err);
     }
   });
@@ -1379,12 +1379,12 @@ function wire() {
   const cfgRawReload = document.getElementById('cfgRawReload');
   if (cfgRawReload) cfgRawReload.addEventListener('click', async () => {
     const msg = document.getElementById('cfgRawMsg');
-    if (msg) msg.textContent = '加载中…';
+    if (msg) msg.textContent = 'Đang tải…';
     try {
       await refreshRawConfig();
-      if (msg) msg.textContent = '已加载';
+      if (msg) msg.textContent = 'Đã tải';
     } catch (err) {
-      if (msg) msg.textContent = '加载失败';
+      if (msg) msg.textContent = 'Tải thất bại';
       alert(err);
     }
   });
@@ -1392,14 +1392,14 @@ function wire() {
   const cfgRawSave = document.getElementById('cfgRawSave');
   if (cfgRawSave) cfgRawSave.addEventListener('click', async () => {
     const msg = document.getElementById('cfgRawMsg');
-    if (msg) msg.textContent = '保存中…';
+    if (msg) msg.textContent = 'Đang lưu…';
     try {
       await saveRawConfig();
       await refreshConfig();
       await refreshRawConfig();
-      if (msg) msg.textContent = '已保存';
+      if (msg) msg.textContent = 'Đã lưu';
     } catch (err) {
-      if (msg) msg.textContent = '保存失败';
+      if (msg) msg.textContent = 'Lưu thất bại';
       alert(err);
     }
   });
@@ -1415,7 +1415,7 @@ function wire() {
     }
     if (t.classList.contains('cancelJob')) {
       const id = t.getAttribute('data-jobid');
-      if (!confirm('确认取消该任务并从列表中清理吗？')) return;
+      if (!confirm('Bạn có chắc muốn huỷ tác vụ này và xoá khỏi danh sách không?')) return;
       try { await cancelJob(id); } catch (err) { alert(err); }
     }
     if (t.classList.contains('retryJob')) {
@@ -1479,7 +1479,7 @@ function wire() {
   const bookNameConfirm = document.getElementById('bookNameConfirm');
   if (bookNameConfirm) bookNameConfirm.addEventListener('click', async () => {
     const selected = document.querySelector('input[name="bookNameOpt"]:checked');
-    if (!selected) { alert('请选择一个书名'); return; }
+    if (!selected) { alert('Vui lòng chọn một tên sách'); return; }
     await submitBookNameChoice(selected.value);
   });
 }

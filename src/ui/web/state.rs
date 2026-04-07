@@ -67,7 +67,7 @@ impl Default for SelfUpdateStore {
                 state: SelfUpdateState::Idle,
                 stage: "idle".to_string(),
                 percent: 0,
-                message: "尚未开始".to_string(),
+                message: "Chua bat dau".to_string(),
                 updated_ms: now_ms(),
             }),
         }
@@ -83,7 +83,12 @@ impl SelfUpdateStore {
         {
             return false;
         }
-        self.set(SelfUpdateState::Running, "prepare", 2, "准备开始自更新…");
+        self.set(
+            SelfUpdateState::Running,
+            "prepare",
+            2,
+            "Dang chuan bi tu cap nhat...",
+        );
         true
     }
 
@@ -416,7 +421,7 @@ impl JobStore {
             return;
         };
         e.info.book_name_options = Some(options);
-        e.info.message = Some("等待选择书名".to_string());
+        e.info.message = Some("Dang cho chon ten sach".to_string());
         e.book_name_sender = Some(sender);
         e.info.updated_ms = now_ms();
     }
@@ -447,7 +452,7 @@ impl JobStore {
             return;
         };
         e.info.format_options = Some(options);
-        e.info.message = Some("等待选择输出格式".to_string());
+        e.info.message = Some("Dang cho chon dinh dang xuat".to_string());
         e.format_sender = Some(sender);
         e.info.updated_ms = now_ms();
     }

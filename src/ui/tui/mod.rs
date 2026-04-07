@@ -367,7 +367,7 @@ impl App {
         Self {
             input: String::new(),
             focus: Focus::Input,
-            status: "输入书名/ID/链接，Enter 确认，Tab 切换焦点，q 退出".to_string(),
+            status: "Nhap ten sach/ID/link, Enter xac nhan, Tab chuyen focus, q thoat".to_string(),
             messages: Vec::new(),
             logs: Vec::new(),
             results: Vec::new(),
@@ -782,7 +782,7 @@ fn render_format_modal(frame: &mut ratatui::Frame, app: &mut App) {
     frame.render_widget(Clear, modal);
     let block = Block::default()
         .borders(Borders::ALL)
-        .title("下载完成：选择输出格式")
+        .title("Tai xong: chon dinh dang xuat")
         .border_style(Style::default().fg(Color::Green));
     frame.render_widget(block, modal);
 
@@ -802,7 +802,7 @@ fn render_format_modal(frame: &mut ratatui::Frame, app: &mut App) {
         ])
         .split(inner);
 
-    let hint = Paragraph::new(vec![Line::from("↑↓ 选择 / Enter 确认")]).wrap(Wrap { trim: true });
+    let hint = Paragraph::new(vec![Line::from("↑↓ chon / Enter xac nhan")]).wrap(Wrap { trim: true });
     frame.render_widget(hint, parts[0]);
 
     let items: Vec<ListItem> = app
@@ -812,7 +812,7 @@ fn render_format_modal(frame: &mut ratatui::Frame, app: &mut App) {
         .collect();
 
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("可选格式"))
+        .block(Block::default().borders(Borders::ALL).title("Dinh dang co the chon"))
         .highlight_style(
             Style::default()
                 .bg(Color::Blue)
@@ -850,7 +850,7 @@ fn search_books(query: &str) -> Result<Vec<SearchItem>> {
 
 #[cfg(not(feature = "official-api"))]
 fn search_books(_query: &str) -> Result<Vec<SearchItem>> {
-    anyhow::bail!("当前构建未启用 official-api feature，搜索功能不可用")
+    anyhow::bail!("Ban build hien tai chua bat official-api feature, khong the tim kiem")
 }
 
 fn detail_from_search(raw: &Value) -> BookDetail {
@@ -989,12 +989,12 @@ pub(super) fn parse_range_input(input: &str, total: usize) -> Result<Option<Chap
 }
 
 const MENU_ITEMS: &[(&str, MenuAction)] = &[
-    ("确定", MenuAction::Confirm),
-    ("配置", MenuAction::Config),
-    ("更新", MenuAction::Update),
-    ("历史", MenuAction::History),
-    ("关于", MenuAction::About),
-    ("退出", MenuAction::Quit),
+    ("Xac nhan", MenuAction::Confirm),
+    ("Cau hinh", MenuAction::Config),
+    ("Cap nhat", MenuAction::Update),
+    ("Lich su", MenuAction::History),
+    ("Gioi thieu", MenuAction::About),
+    ("Thoat", MenuAction::Quit),
 ];
 
 const SPINNER_FRAMES: &[char] = &['|', '/', '-', '\\'];
@@ -1002,15 +1002,15 @@ const SPINNER_FRAMES: &[char] = &['|', '/', '-', '\\'];
 const LOG_HEIGHT: u16 = 7;
 
 #[cfg(feature = "docker")]
-const ABOUT_BUTTONS: &[&str] = &["打开Github仓库", "返回"];
+const ABOUT_BUTTONS: &[&str] = &["Mo kho Github", "Quay lai"];
 
 #[cfg(not(feature = "docker"))]
 const ABOUT_BUTTONS: &[&str] = &[
-    "打开Github仓库",
-    "检查程序更新",
-    "执行自更新",
-    "不再提醒该版本",
-    "返回",
+    "Mo kho Github",
+    "Kiem tra cap nhat chuong trinh",
+    "Thuc hien tu cap nhat",
+    "Khong nhac lai ban nay",
+    "Quay lai",
 ];
 
 fn current_category(app: &App) -> Option<(usize, &ConfigCategory)> {
@@ -1054,7 +1054,7 @@ pub(super) fn select_next_category(app: &mut App) {
     app.cfg_cat_state.select(Some(next));
     ensure_entry_selection(app);
     if let Some((_, cat)) = current_category(app) {
-        app.status = format!("当前分类: {}", cat.title);
+        app.status = format!("Nhom hien tai: {}", cat.title);
     }
 }
 
@@ -1077,7 +1077,7 @@ pub(super) fn select_prev_category(app: &mut App) {
     app.cfg_cat_state.select(Some(prev));
     ensure_entry_selection(app);
     if let Some((_, cat)) = current_category(app) {
-        app.status = format!("当前分类: {}", cat.title);
+        app.status = format!("Nhom hien tai: {}", cat.title);
     }
 }
 
@@ -1163,7 +1163,7 @@ fn split_with_log(area: Rect) -> (Rect, Rect) {
 fn render_log_box(frame: &mut ratatui::Frame, area: Rect, app: &App) {
     let mut lines = Vec::new();
     if app.logs.is_empty() {
-        lines.push(Line::from("日志: 暂无"));
+        lines.push(Line::from("Nhat ky: chua co"));
     } else {
         // Fit to visible height (area minus top/bottom borders) so the view auto-sticks to latest entries.
         let visible = area
@@ -1182,7 +1182,7 @@ fn render_log_box(frame: &mut ratatui::Frame, area: Rect, app: &App) {
 
     let log = Paragraph::new(lines)
         .wrap(Wrap { trim: true })
-        .block(Block::default().borders(Borders::ALL).title("日志"));
+        .block(Block::default().borders(Borders::ALL).title("Nhat ky"));
     frame.render_widget(log, area);
 }
 
@@ -1211,10 +1211,10 @@ fn render_prewarm_overlay(frame: &mut ratatui::Frame, app: &App) {
     };
 
     let spinner = SPINNER_FRAMES[(app.prewarm_spinner_idx) % SPINNER_FRAMES.len()];
-    let text = format!(" IID 预热中… {}", spinner);
+    let text = format!(" IID dang prewarm... {}", spinner);
     let lines = vec![
         Line::from(Span::styled(
-            " 初始化",
+            " Khoi tao",
             Style::default()
                 .fg(Color::Cyan)
                 .add_modifier(Modifier::BOLD),
@@ -1225,7 +1225,7 @@ fn render_prewarm_overlay(frame: &mut ratatui::Frame, app: &App) {
     frame.render_widget(Clear, overlay);
     let block = Block::default()
         .borders(Borders::ALL)
-        .title("正在预热 IID")
+        .title("Dang prewarm IID")
         .title_alignment(Alignment::Right);
     frame.render_widget(block, overlay);
     frame.render_widget(
@@ -1250,7 +1250,7 @@ fn render_book_name_modal(frame: &mut ratatui::Frame, app: &mut App) {
     frame.render_widget(Clear, modal);
     let block = Block::default()
         .borders(Borders::ALL)
-        .title("下载完成：选择书名")
+        .title("Tai xong: chon ten sach")
         .border_style(Style::default().fg(Color::Green));
     frame.render_widget(block, modal);
 
@@ -1270,7 +1270,7 @@ fn render_book_name_modal(frame: &mut ratatui::Frame, app: &mut App) {
         ])
         .split(inner);
 
-    let hint = Paragraph::new(vec![Line::from("↑↓ 选择 / Enter 确认")]).wrap(Wrap { trim: true });
+    let hint = Paragraph::new(vec![Line::from("↑↓ chon / Enter xac nhan")]).wrap(Wrap { trim: true });
     frame.render_widget(hint, parts[0]);
 
     let items: Vec<ListItem> = app
@@ -1280,7 +1280,7 @@ fn render_book_name_modal(frame: &mut ratatui::Frame, app: &mut App) {
         .collect();
 
     let list = List::new(items)
-        .block(Block::default().borders(Borders::ALL).title("候选书名"))
+        .block(Block::default().borders(Borders::ALL).title("Ten sach de xuat"))
         .highlight_style(
             Style::default()
                 .bg(Color::Blue)
@@ -1290,7 +1290,7 @@ fn render_book_name_modal(frame: &mut ratatui::Frame, app: &mut App) {
     frame.render_stateful_widget(list, parts[1], &mut app.book_name_modal_state);
     app.last_book_name_modal_list = Some(parts[1]);
 
-    let footer = Paragraph::new(Line::from("选择后将用于最终文件名（下载临时目录不变）"))
+    let footer = Paragraph::new(Line::from("Lua chon nay se dung cho ten file cuoi cung (thu muc tam khi tai khong doi)"))
         .wrap(Wrap { trim: true });
     frame.render_widget(footer, parts[2]);
 }
@@ -1386,14 +1386,14 @@ pub(super) fn switch_view(app: &mut App, action: MenuAction) -> Result<()> {
         MenuAction::Confirm => home::process_input(app)?,
         MenuAction::Config => {
             app.view = View::Config;
-            app.status = "进入配置编辑".to_string();
+            app.status = "Vao man hinh chinh sua cau hinh".to_string();
             app.focus = Focus::Input;
         }
         MenuAction::Update => show_update_menu(app)?,
         MenuAction::History => show_history_menu(app)?,
         MenuAction::About => {
             app.view = View::About;
-            app.status = "关于".to_string();
+            app.status = "Gioi thieu".to_string();
         }
         MenuAction::Quit => app.should_quit = true,
     }
@@ -1410,8 +1410,8 @@ pub(super) fn trigger_menu_action(app: &mut App) -> Result<()> {
 }
 
 pub(super) fn start_search_task(app: &mut App, query: String) -> Result<()> {
-    info!(target: "ui", "开始搜索: {query}");
-    start_spinner(app, "搜索中…");
+    info!(target: "ui", "Bat dau tim kiem: {query}");
+    start_spinner(app, "Dang tim kiem...");
     let tx = app.worker_tx.clone();
     thread::spawn(move || {
         let result = search_books(&query);
@@ -1439,13 +1439,13 @@ fn poll_worker(app: &mut App) -> Result<()> {
             WorkerMsg::SearchDone(res) => match res {
                 Ok(results) => {
                     if results.is_empty() {
-                        app.status = "未找到匹配书籍".to_string();
+                        app.status = "Khong tim thay sach phu hop".to_string();
                         app.results.clear();
                         app.list_state.select(None);
                         app.focus = Focus::Input;
                     } else {
                         app.status = format!(
-                            "找到 {} 本书，使用上下键选择，Enter 预览/下载。",
+                            "Tim thay {} sach, dung phim len/xuong de chon, Enter de xem truoc/tai.",
                             results.len()
                         );
                         app.results = results;
@@ -1454,9 +1454,9 @@ fn poll_worker(app: &mut App) -> Result<()> {
                     }
                 }
                 Err(err) => {
-                    app.status = format!("搜索失败: {err}");
-                    app.push_message(format!("搜索失败: {err}"));
-                    warn!(target: "ui", "搜索失败: {err}");
+                    app.status = format!("Tim kiem that bai: {err}");
+                    app.push_message(format!("Tim kiem that bai: {err}"));
+                    warn!(target: "ui", "Tim kiem that bai: {err}");
                 }
             },
             WorkerMsg::PreviewReady(res) => match *res {
@@ -1474,7 +1474,7 @@ fn poll_worker(app: &mut App) -> Result<()> {
                     app.book_name_modal_options = options;
                     app.book_name_modal_state.select(Some(0));
                     app.book_name_modal_sender = Some(respond_to);
-                    app.status = "请选择书名（下载已完成）".to_string();
+                    app.status = "Hay chon ten sach (tai da hoan tat)".to_string();
                 }
             }
             WorkerMsg::AskFormat {
@@ -1488,13 +1488,13 @@ fn poll_worker(app: &mut App) -> Result<()> {
                     app.format_modal_options = options;
                     app.format_modal_state.select(Some(0));
                     app.format_modal_sender = Some(respond_to);
-                    app.status = "请选择输出格式（下载已完成）".to_string();
+                    app.status = "Hay chon dinh dang xuat (tai da hoan tat)".to_string();
                 }
             }
             WorkerMsg::UpdateScanned(res) => match res {
                 Ok((updates, no_updates)) => {
                     if updates.is_empty() && no_updates.is_empty() {
-                        app.status = "未发现本地小说，先下载一本试试".to_string();
+                        app.status = "Chua tim thay sach cuc bo, hay thu tai mot sach truoc".to_string();
                         app.view = View::Home;
                     } else {
                         app.update_entries = updates;
@@ -1509,15 +1509,15 @@ fn poll_worker(app: &mut App) -> Result<()> {
                         }
                         let has = app.update_entries.len();
                         let none = app.update_no_updates.len();
-                        app.status = format!("扫描完成：有更新 {has} 本，无更新 {none} 本");
-                        info!(target: "ui", updates = has, no_updates = none, "扫描完成");
+                        app.status = format!("Quet xong: co cap nhat {has} sach, khong cap nhat {none} sach");
+                        info!(target: "ui", updates = has, no_updates = none, "Quet xong");
                         app.view = View::Update;
                     }
                 }
                 Err(err) => {
-                    app.status = format!("扫描更新失败: {err}");
-                    app.push_message(format!("扫描更新失败: {err}"));
-                    warn!(target: "ui", "扫描更新失败: {err}");
+                    app.status = format!("Quet cap nhat that bai: {err}");
+                    app.push_message(format!("Quet cap nhat that bai: {err}"));
+                    warn!(target: "ui", "Quet cap nhat that bai: {err}");
                 }
             },
             WorkerMsg::DownloadDone { book_id, result } => {
@@ -1529,11 +1529,11 @@ fn poll_worker(app: &mut App) -> Result<()> {
                     let notify = crate::base_system::app_update::should_notify_startup(&report);
                     if notify {
                         app.status = format!(
-                            "发现新版本 {}（当前 {}），在 About 页面可查看/不再提醒",
+                            "Phat hien ban moi {} (hien tai {}), vao trang About de xem/bo nhac",
                             report.latest.tag_name, report.current_tag
                         );
                         app.push_message(format!(
-                            "新版本可用: {} (当前 {})",
+                            "Co ban moi: {} (hien tai {})",
                             report.latest.tag_name, report.current_tag
                         ));
                     }
@@ -1541,7 +1541,7 @@ fn poll_worker(app: &mut App) -> Result<()> {
                 }
                 Err(err) => {
                     // 不影响使用：仅记录日志。
-                    warn!(target: "ui", "检查程序更新失败: {err}");
+                    warn!(target: "ui", "Kiem tra cap nhat chuong trinh that bai: {err}");
                 }
             },
         }
@@ -1551,9 +1551,9 @@ fn poll_worker(app: &mut App) -> Result<()> {
 
 pub(super) fn format_word_count(words: usize) -> String {
     if words >= 10_000 {
-        format!("{:.1} 万字", words as f64 / 10_000.0)
+        format!("{:.1} van chu", words as f64 / 10_000.0)
     } else {
-        format!("{} 字", words)
+        format!("{} chu", words)
     }
 }
 

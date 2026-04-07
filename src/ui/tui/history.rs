@@ -16,7 +16,7 @@ pub(super) fn handle_event_history(app: &mut App, event: Event) -> Result<()> {
         Event::Key(key) if key.kind == KeyEventKind::Press => match key.code {
             KeyCode::Char('b') | KeyCode::Esc => {
                 app.view = View::Home;
-                app.status = "返回首页".to_string();
+                app.status = "Quay lại trang chủ".to_string();
             }
             KeyCode::Char('r') => {
                 refresh_history(app);
@@ -35,10 +35,10 @@ fn refresh_history(app: &mut App) {
     app.history_entries = read_download_history(200, None);
     if app.history_entries.is_empty() {
         app.history_state.select(None);
-        app.status = "下载历史为空".to_string();
+        app.status = "Lịch sử tải xuống trống".to_string();
     } else {
         app.history_state.select(Some(0));
-        app.status = format!("已加载下载历史 {} 条", app.history_entries.len());
+        app.status = format!("Đã tải {} bản ghi lịch sử tải xuống", app.history_entries.len());
     }
 }
 
@@ -89,7 +89,7 @@ fn handle_mouse_history(app: &mut App, me: event::MouseEvent) {
                 && super::pos_in(back_btn, me.column, me.row)
             {
                 app.view = View::Home;
-                app.status = "返回首页".to_string();
+                app.status = "Quay lại trang chủ".to_string();
                 return;
             }
             if super::pos_in(list_area, me.column, me.row)
@@ -126,26 +126,26 @@ pub(super) fn draw_history(frame: &mut ratatui::Frame, app: &mut App) {
 
     let header = Paragraph::new(Line::from(vec![
         Span::styled(
-            "下载历史",
+            "Lịch sử tải xuống",
             Style::default()
                 .fg(Color::Cyan)
                 .add_modifier(Modifier::BOLD),
         ),
-        Span::raw("  |  ↑↓ 选择  r 刷新  b 返回"),
+        Span::raw("  |  ↑↓ chon  r lam moi  b quay lai"),
     ]))
-    .block(Block::default().borders(Borders::ALL).title("History"));
+    .block(Block::default().borders(Borders::ALL).title("Lịch sử"));
     frame.render_widget(header, layout[0]);
 
     let items: Vec<ListItem> = if app.history_entries.is_empty() {
-        vec![ListItem::new("暂无记录")]
+            vec![ListItem::new("Không có bản ghi")]
     } else {
         app.history_entries
             .iter()
             .map(|it| {
                 let st = if it.status.eq_ignore_ascii_case("success") {
-                    "成功"
+                    "Thành công"
                 } else {
-                    "失败"
+                    "Thất bại"
                 };
                 ListItem::new(format!(
                     "[{}] 《{}》({}) | {} | {}",
@@ -155,7 +155,7 @@ pub(super) fn draw_history(frame: &mut ratatui::Frame, app: &mut App) {
             .collect()
     };
 
-    let list_block = Block::default().borders(Borders::ALL).title("记录列表");
+    let list_block = Block::default().borders(Borders::ALL).title("Danh sách bản ghi");
     frame.render_widget(list_block.clone(), layout[1]);
     let inner = list_block.inner(layout[1]);
     let need_scrollbar = app.history_entries.len() > inner.height as usize && inner.width > 1;
@@ -206,11 +206,11 @@ pub(super) fn draw_history(frame: &mut ratatui::Frame, app: &mut App) {
     let details = selected_details(app.history_entries.as_slice(), app.history_state.selected());
     let detail_widget = Paragraph::new(details)
         .wrap(Wrap { trim: true })
-        .block(Block::default().borders(Borders::ALL).title("详情"));
+        .block(Block::default().borders(Borders::ALL).title("Chi tiết"));
     frame.render_widget(detail_widget, layout[2]);
 
     let btn_area = back_button_rect(layout[2]);
-    let btn = Paragraph::new("[ 返回 ]")
+    let btn = Paragraph::new("[ Quay lai ]")
         .alignment(Alignment::Center)
         .style(
             Style::default()
@@ -240,25 +240,25 @@ fn selected_details(
     selected: Option<usize>,
 ) -> Vec<Line<'static>> {
     let Some(idx) = selected else {
-        return vec![Line::from("暂无可展示详情")];
+        return vec![Line::from("Không có chi tiết để hiển thị")];
     };
     let Some(it) = items.get(idx) else {
-        return vec![Line::from("暂无可展示详情")];
+        return vec![Line::from("Không có chi tiết để hiển thị")];
     };
 
     vec![
-        Line::from(format!("时间: {}", it.timestamp)),
-        Line::from(format!("书名: {}", it.book_name)),
+        Line::from(format!("Thời gian: {}", it.timestamp)),
+        Line::from(format!("Tên sách: {}", it.book_name)),
         Line::from(format!(
-            "作者: {}",
+            "Tác giả: {}",
             if it.author.is_empty() {
-                "未知"
+                "Không rõ"
             } else {
                 it.author.as_str()
             }
         )),
         Line::from(format!("Book ID: {}", it.book_id)),
-        Line::from(format!("进度: {}", it.progress)),
-        Line::from(format!("状态: {}", it.status)),
+        Line::from(format!("Tiến độ: {}", it.progress)),
+        Line::from(format!("Trạng thái: {}", it.status)),
     ]
 }

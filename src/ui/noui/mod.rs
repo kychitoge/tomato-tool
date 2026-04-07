@@ -42,22 +42,22 @@ pub fn run(config: &mut Config) -> Result<()> {
     let _ = execute!(out, DisableMouseCapture, LeaveAlternateScreen);
 
     println!(
-        "欢迎使用番茄小说下载器! v{}\n\
-项目地址: https://github.com/zhongbai2333/Tomato-Novel-Downloader \n\
-Fork From: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
-作者: zhongbai233 (https://github.com/zhongbai2333) \n\
-项目早期代码: Dlmily (https://github.com/Dlmily) \n\
-\n\
-项目说明: 此项目基于Dlmily的项目Fork而来, 我对其进行重构 + 优化, 添加更对功能, 包括: EPUB下载支持、更好的断点传输、更好的错误管理等特性 \n\
-本项目[完全]基于第三方API, [未]使用官方API, 如有需要可以查看Dlmily的项目 \n\
-本项目仅供网络爬虫技术、网页数据处理及相关研究的学习用途。请勿将其用于任何违反法律法规或侵犯他人权益的活动。",
+        "Chao mung ban den voi Tomato Novel Downloader! v{}\n\
+    Du an: https://github.com/zhongbai2333/Tomato-Novel-Downloader \n\
+    Fork tu: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
+    Tac gia: zhongbai233 (https://github.com/zhongbai2333) \n\
+    Ma nguon giai doan dau: Dlmily (https://github.com/Dlmily) \n\
+    \n\
+    Mo ta: Du an nay fork tu ban cua Dlmily va da duoc tai cau truc + toi uu, bo sung nhieu tinh nang nhu ho tro EPUB, tiep tuc tai tot hon va quan ly loi tot hon. \n\
+    Du an nay su dung API ben thu ba, khong su dung API chinh thuc. Neu can, hay tham khao du an cua Dlmily. \n\
+    Du an chi dung cho muc dich hoc tap ve crawler xu ly du lieu web va nghien cuu lien quan. Khong dung cho bat ky hanh vi vi pham phap luat hoac xam pham quyen loi nguoi khac.",
         env!("CARGO_PKG_VERSION")
     );
 
     #[cfg(feature = "official-api")]
     println!(
-        "\n【免费声明】本程序完全免费，若发现收费渠道，请勿上当受骗！\n\
-      官方仓库: https://github.com/zhongbai2333/Tomato-Novel-Downloader"
+                "\n[Tuyen bo mien phi] Chuong trinh nay hoan toan mien phi, neu co kenh thu phi thi hay canh giac!\n\
+            Kho chinh thuc: https://github.com/zhongbai2333/Tomato-Novel-Downloader"
     );
 
     // 每次启动检查程序更新（不影响后续流程，失败直接忽略）。
@@ -65,7 +65,7 @@ Fork From: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
 
     loop {
         let prompt = format!(
-            "旧 CLI 已禁用新建下载；请输入命令（s配置 / h下载历史 / u更新小说 / c检查更新 / U程序自更新 / q退出，默认保存到 {}）：",
+            "CLI cu da tat tinh nang tai moi; hay nhap lenh (s cau hinh / h lich su tai / u cap nhat sach / c kiem tra cap nhat / U tu cap nhat chuong trinh / q thoat, mac dinh luu tai {}):",
             config.default_save_dir().display()
         );
         let input = read_line(&prompt)?;
@@ -74,7 +74,7 @@ Fork From: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
             continue;
         }
         if text.eq_ignore_ascii_case("q") {
-            println!("已退出。");
+            println!("Da thoat.");
             break;
         }
         if text.eq_ignore_ascii_case("s") {
@@ -87,11 +87,11 @@ Fork From: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
         }
         if text.eq_ignore_ascii_case("u") {
             if let Some(book_id) = update::update_menu(config)? {
-                println!("已选择更新 book_id={}\n", book_id);
+                println!("Da chon cap nhat book_id={}\n", book_id);
                 // 直接进入该书下载流程
                 match download_book(&book_id, config) {
-                    Ok(()) => println!("下载完成\n"),
-                    Err(err) => println!("下载失败: {}\n", err),
+                    Ok(()) => println!("Tai xong\n"),
+                    Err(err) => println!("Tai that bai: {}\n", err),
                 }
             }
             continue;
@@ -111,7 +111,7 @@ Fork From: https://github.com/Dlmily/Tomato-Novel-Downloader-Lite \n\
         }
 
         println!(
-            "旧 CLI 模式已禁用下载新小说。\n如需新增下载，请使用 TUI 或 Web UI；旧 CLI 仅保留“u”更新本地已有小说。\n"
+            "Che do CLI cu da tat tinh nang tai sach moi.\nNeu muon them sach moi, hay dung TUI hoac Web UI; CLI cu chi giu lenh 'u' de cap nhat sach da co san.\n"
         );
     }
 

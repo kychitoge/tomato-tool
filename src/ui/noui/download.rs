@@ -63,7 +63,7 @@ fn ensure_local_download_exists(config: &Config, book_id: &str) -> Result<()> {
     }
 
     Err(anyhow!(
-        "CLI 模式仅支持更新本地已有小说：未在 {} 下找到 book_id={} 的下载记录。请先使用 Web UI 或 TUI 完成首次下载。",
+        "Chế độ CLI chỉ hỗ trợ cập nhật truyện đã có sẵn cục bộ: không tìm thấy bản ghi tải xuống của book_id={} trong {}. Hãy dùng Web UI hoặc TUI để tải lần đầu.",
         config.default_save_dir().display(),
         book_id
     ))
@@ -72,7 +72,7 @@ fn ensure_local_download_exists(config: &Config, book_id: &str) -> Result<()> {
 fn has_local_download_record(config: &Config, book_id: &str) -> Result<bool> {
     Ok(config
         .find_existing_status_folder_by_book_id(book_id, None)
-        .with_context(|| format!("读取保存目录失败: {}", config.default_save_dir().display()))?
+        .with_context(|| format!("Doc thu muc luu that bai: {}", config.default_save_dir().display()))?
         .is_some())
 }
 
@@ -84,7 +84,7 @@ fn download_book_with_options(
     let start_time = Instant::now();
 
     let plan = dl::prepare_download_plan(config, book_id, dl::BookMeta::default())
-        .with_context(|| format!("准备下载计划失败: book_id={}", book_id))?;
+        .with_context(|| format!("Chuan bi ke hoach tai that bai: book_id={}", book_id))?;
 
     let book_name = plan
         .meta
@@ -92,26 +92,26 @@ fn download_book_with_options(
         .clone()
         .unwrap_or_else(|| plan.book_id.clone());
 
-    // 打印书籍信息（对齐 old_main.py 的信息展示）
-    println!("\n书名: {}", book_name);
+    // In thông tin sách (giữ cách hiển thị tương thích với bản cũ)
+    println!("\nTen sach: {}", book_name);
     if let Some(author) = plan.meta.author.as_deref() {
-        println!("作者: {}", author);
+        println!("Tac gia: {}", author);
     }
     if let Some(finished) = plan.meta.finished {
-        println!("是否完结: {}", if finished { "完结" } else { "连载" });
+        println!("Trang thai hoan thanh: {}", if finished { "Da hoan" } else { "Dang ra" });
     }
     if let Some(count) = plan.meta.chapter_count {
-        println!("章节数: {}", count);
+        println!("So chuong: {}", count);
     }
     if !plan.meta.tags.is_empty() {
-        println!("标签: {}", plan.meta.tags.join("|"));
+        println!("The: {}", plan.meta.tags.join("|"));
     }
     if let Some(desc) = plan.meta.description.as_deref() {
         let mut short = desc.to_string();
         if short.chars().count() > 50 {
             short = short.chars().take(50).collect::<String>() + "...";
         }
-        println!("简介: {}", short);
+        println!("Tom tat: {}", short);
     }
 
     // 初始化 BookManager 并尝试加载历史状态
@@ -119,7 +119,7 @@ fn download_book_with_options(
     let resumed =
         manager.load_existing_status(&manager.book_id.clone(), &manager.book_name.clone());
     if resumed {
-        println!("\n已检测到历史下载记录，可继续下载或选择重新下载。\n");
+        println!("\nĐã phát hiện bản ghi tải xuống cũ, có thể tiếp tục tải hoặc chọn tải lại.\n");
     }
 
     // 若封面已经下载到状态目录，尝试 ASCII 预览
@@ -130,7 +130,7 @@ fn download_book_with_options(
     let total = plan.chapters.len();
     let (downloaded_ok, failed_count) = count_download_state(&manager, &plan.chapters);
     println!(
-        "共发现 {} 章，下载失败 {} 章，已下载 {} 章",
+        "Tong cong {} chuong, tai that bai {} chuong, da tai {} chuong",
         total, failed_count, downloaded_ok
     );
 
@@ -152,7 +152,7 @@ fn download_book_with_options(
         }
         DownloadMode::Full => {
             manager.downloaded.clear();
-            println!("将重新下载全部章节");
+            println!("Se tai lai toan bo chuong");
         }
         DownloadMode::RangeIgnoreHistory | DownloadMode::RangeOrAll => {
             range = if options.interactive {
@@ -169,7 +169,7 @@ fn download_book_with_options(
 
     let chosen_chapters = dl::apply_range(&plan.chapters, range);
     if chosen_chapters.is_empty() {
-        println!("范围无效或章节为空\n");
+        println!("Pham vi khong hop le hoac danh sach chuong rong\n");
         let _ = manager.cleanup_status_folder();
         return Ok(());
     }
@@ -181,29 +181,29 @@ fn download_book_with_options(
 
     if matches!(mode, DownloadMode::Resume) {
         println!(
-            "继续下载剩余章节: {} 章 (已完成 {})",
+            "Tiếp tục tải các chương còn lại: {} chương (đã hoàn tất {})",
             pending.len(),
             chosen_chapters.len().saturating_sub(pending.len())
         );
     }
 
     if pending.is_empty() {
-        println!("没有需要下载的章节，将仅补齐段评缓存并执行收尾生成。\n");
+        println!("Không có chương nào cần tải; sẽ chỉ bổ sung bộ nhớ đệm đoạn bình luận và chạy bước hoàn tất.\n");
     }
 
-    println!("\n开始下载...");
+    println!("\nBat dau tai...");
     let save_dir = manager.default_save_dir();
 
     let retry_failed = if options.interactive {
         dl::RetryFailed::Decide(Box::new(|pending_len| {
-            let ans = super::read_line("是否重新下载错误章节？[Y/n]: ")
+            let ans = super::read_line("Có tải lại các chương lỗi không? [Y/n]: ")
                 .map(|s| s.trim().to_ascii_lowercase())
                 .unwrap_or_else(|_| "n".to_string());
             if ans == "n" {
-                println!("失败章节已保留在缓存/状态文件中。\n");
+                println!("Các chương lỗi đã được giữ trong bộ nhớ đệm/tệp trạng thái.\n");
                 return false;
             }
-            println!("\n重新下载失败章节: {} 章...", pending_len);
+            println!("\nĐang tải lại các chương lỗi: {} chương...", pending_len);
             true
         }))
     } else if options.retry_failed_once {
@@ -213,7 +213,7 @@ fn download_book_with_options(
                 return false;
             }
             retried = true;
-            println!("\n重新下载失败章节: {} 章...", pending_len);
+            println!("\nĐang tải lại các chương lỗi: {} chương...", pending_len);
             true
         }))
     } else {
@@ -237,7 +237,7 @@ fn download_book_with_options(
             retry_failed,
             stage_callback: Some(Box::new(|result| {
                 println!(
-                    "\n下载完成（阶段）成功: {} 章 | 失败: {} 章 | 取消: {} 章",
+                    "\nTai xong (giai doan): thanh cong {} chuong | that bai {} chuong | huy {} chuong",
                     result.success, result.failed, result.canceled
                 );
             })),
@@ -249,10 +249,10 @@ fn download_book_with_options(
     )?;
 
     println!(
-        "\n下载完成！用时 {:.1} 秒",
+        "\nTai xong! Mat {:.1} giay",
         start_time.elapsed().as_secs_f32()
     );
-    println!("已保存到 {}", save_dir.display());
+    println!("Da luu vao {}", save_dir.display());
     Ok(())
 }
 
@@ -267,15 +267,15 @@ enum DownloadMode {
 }
 
 fn select_download_mode(has_failed: bool) -> Result<DownloadMode> {
-    println!("\n===== 下载模式选择 =====");
-    println!("1. 继续下载未完成章节");
-    println!("2. 全部重新下载");
+    println!("\n===== Chon che do tai =====");
+    println!("1. Tiep tuc tai cac chuong chua xong");
+    println!("2. Tai lai toan bo");
     if has_failed {
-        println!("3. 仅重新下载失败章节");
+        println!("3. Chi tai lai cac chuong that bai");
     }
-    println!("4. 指定章节范围重新下载 (忽略历史记录)");
-    println!("q. 取消");
-    let sel = super::read_line("请选择(默认1): ")?;
+    println!("4. Tai lai theo pham vi chuong (bo qua lich su)");
+    println!("q. Huy");
+    let sel = super::read_line("Hay chon (mac dinh 1): ")?;
     let sel = sel.trim().to_ascii_lowercase();
     let mode = match sel.as_str() {
         "" | "1" => DownloadMode::Resume,
@@ -289,21 +289,21 @@ fn select_download_mode(has_failed: bool) -> Result<DownloadMode> {
 }
 
 fn prompt_range(total: usize) -> Result<Option<dl::ChapterRange>> {
-    let text = super::read_line("输入章节范围 形如 10~200 (留空表示全部): ")?;
+    let text = super::read_line("Nhap pham vi chuong dang 10~200 (de trong = tat ca): ")?;
     let text = text.trim();
     if text.is_empty() {
         return Ok(None);
     }
     let Some((a, b)) = text.split_once('~') else {
-        println!("范围格式错误，应为 a~b，将使用全部章节");
+        println!("Sai dinh dang pham vi, can a~b; se dung tat ca chuong");
         return Ok(None);
     };
     let Ok(mut start) = a.trim().parse::<usize>() else {
-        println!("范围解析失败，将使用全部章节");
+        println!("Khong phan tich duoc pham vi; se dung tat ca chuong");
         return Ok(None);
     };
     let Ok(mut end) = b.trim().parse::<usize>() else {
-        println!("范围解析失败，将使用全部章节");
+        println!("Khong phan tich duoc pham vi; se dung tat ca chuong");
         return Ok(None);
     };
     if start == 0 {
@@ -317,7 +317,7 @@ fn prompt_range(total: usize) -> Result<Option<dl::ChapterRange>> {
     if start > end {
         std::mem::swap(&mut start, &mut end);
     }
-    println!("已选择章节范围: {}~{}", start, end);
+    println!("Da chon pham vi chuong: {}~{}", start, end);
     Ok(Some(dl::ChapterRange { start, end }))
 }
 
@@ -361,13 +361,13 @@ fn preview_cover_ascii(image_path: &Path) -> Result<()> {
     let cols = cols.max(40) as u32;
     let rows = rows.max(10) as u32;
     println!(
-        "\n{}封面预览{}",
+        "\n{}Xem truoc bia{}",
         "=".repeat((cols as usize).saturating_sub(16) / 2),
         "=".repeat((cols as usize).saturating_sub(16) / 2)
     );
 
     let img = image::open(image_path)
-        .with_context(|| format!("打开封面失败: {}", image_path.display()))?;
+        .with_context(|| format!("Mo file bia that bai: {}", image_path.display()))?;
     let gray = img.to_luma8();
 
     // 字符宽高比矫正：字符通常更“高”，所以宽度多取一些、并降低高度
